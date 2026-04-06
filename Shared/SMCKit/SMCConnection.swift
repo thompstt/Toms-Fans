@@ -30,6 +30,13 @@ final class SMCConnection {
         isOpen = true
     }
 
+    /// Close and reopen the SMC connection.
+    /// Call after sleep/wake — the IOKit handle may become stale.
+    func reconnect() throws {
+        close()
+        try open()
+    }
+
     /// Close the SMC connection.
     func close() {
         if isOpen {

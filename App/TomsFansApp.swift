@@ -12,6 +12,7 @@ struct TomsFansApp: App {
     @StateObject private var curveEngine = FanCurveEngine()
     @StateObject private var settings = AppSettings()
     @StateObject private var notifications = NotificationService()
+    @StateObject private var errorLog = ErrorLog()
 
     var body: some Scene {
         Window("Tom's Fans", id: "main") {
@@ -22,6 +23,7 @@ struct TomsFansApp: App {
                 .environmentObject(curveEngine)
                 .environmentObject(settings)
                 .environmentObject(notifications)
+                .environmentObject(errorLog)
                 .onAppear {
                     bootstrapIfNeeded()
                     monitor.isCollectingHistory = true
@@ -44,8 +46,8 @@ struct TomsFansApp: App {
             MenuBarView()
                 .environmentObject(monitor)
                 .environmentObject(fanControl)
-                .environmentObject(curveEngine)
                 .environmentObject(settings)
+                .environmentObject(errorLog)
                 .onAppear {
                     // Also wire up here in case window wasn't opened
                     bootstrapIfNeeded()
@@ -60,6 +62,7 @@ struct TomsFansApp: App {
                 .environmentObject(settings)
                 .environmentObject(helperInstall)
                 .environmentObject(notifications)
+                .environmentObject(errorLog)
         }
     }
 
@@ -69,8 +72,12 @@ struct TomsFansApp: App {
     private func bootstrapIfNeeded() {
         guard !Self.hasBootstrapped else { return }
         Self.hasBootstrapped = true
+        monitor.errorLog = errorLog
+        fanControl.errorLog = errorLog
+        curveEngine.errorLog = errorLog
         monitor.updatePollInterval(settings.pollInterval)
         setupPollCallback()
+        setupSafetyCallbacks()
         notifications.setup()
         reapplySavedMode()
         observePollIntervalChanges()
@@ -100,26 +107,8 @@ struct TomsFansApp: App {
         center.publisher(for: NSWorkspace.didWakeNotification)
             .sink { [weak monitor, weak fanControl, weak curveEngine, weak settings] _ in
                 monitor?.resumePolling()
-                // Re-apply saved control mode
                 guard let settings, let fanControl else { return }
-                switch settings.controlMode {
-                case .automatic:
-                    break
-                case .preset:
-                    if let presetId = settings.activePresetId,
-                       let preset = settings.presets.first(where: { $0.id == presetId }) {
-                        for (fanIndex, rpm) in preset.fanSpeeds {
-                            if preset.isForceMode {
-                                fanControl.setFanMode(fanIndex: fanIndex, mode: 1)
-                            }
-                            fanControl.setFanMinSpeed(fanIndex: fanIndex, rpm: rpm)
-                        }
-                    }
-                case .manual:
-                    settings.controlMode = .automatic
-                case .fanCurve:
-                    curveEngine?.reset()
-                }
+                reapplyMode(settings: settings, fanControl: fanControl, curveEngine: curveEngine)
             }
             .store(in: &Self.cancellables)
     }
@@ -144,6 +133,19 @@ struct TomsFansApp: App {
         }
     }
 
+    private func setupSafetyCallbacks() {
+        let restore = { [weak fanControl, weak curveEngine, weak settings] in
+            guard let settings, let fanControl else { return }
+            guard settings.controlMode != .automatic else { return }
+            settings.controlMode = .automatic
+            curveEngine?.reset()
+            fanControl.restoreAutomatic()
+        }
+        monitor.onSafetyRestore = restore
+        curveEngine.onSafetyRestore = restore
+        fanControl.onDisconnect = restore
+    }
+
     private func sendMenuBarNotification() {
         let content = UNMutableNotificationContent()
         content.title = "Tom's Fans is still running"
@@ -152,28 +154,33 @@ struct TomsFansApp: App {
         UNUserNotificationCenter.current().add(request)
     }
 
-    /// Re-apply the persisted control mode on launch.
+    /// Re-apply the persisted control mode on launch or wake.
     private func reapplySavedMode() {
-        switch settings.controlMode {
-        case .automatic:
-            break
-        case .preset:
-            if let presetId = settings.activePresetId,
-               let preset = settings.presets.first(where: { $0.id == presetId }) {
-                for (fanIndex, rpm) in preset.fanSpeeds {
-                    if preset.isForceMode {
-                        fanControl.setFanMode(fanIndex: fanIndex, mode: 1)
-                    }
-                    fanControl.setFanMinSpeed(fanIndex: fanIndex, rpm: rpm)
+        reapplyMode(settings: settings, fanControl: fanControl, curveEngine: curveEngine)
+    }
+}
+
+// MARK: - Shared Mode Reapplication
+
+private func reapplyMode(settings: AppSettings, fanControl: XPCFanControlService,
+                         curveEngine: FanCurveEngine?) {
+    switch settings.controlMode {
+    case .automatic:
+        break
+    case .preset:
+        if let presetId = settings.activePresetId,
+           let preset = settings.presets.first(where: { $0.id == presetId }) {
+            for (fanIndex, rpm) in preset.fanSpeeds {
+                if preset.isForceMode {
+                    fanControl.setFanMode(fanIndex: fanIndex, mode: 1)
                 }
+                fanControl.setFanMinSpeed(fanIndex: fanIndex, rpm: rpm)
             }
-        case .manual:
-            // Manual speeds aren't persisted — revert to automatic on relaunch
-            settings.controlMode = .automatic
-        case .fanCurve:
-            // Fan curve will be picked up by the onPoll callback automatically
-            break
         }
+    case .manual:
+        settings.controlMode = .automatic
+    case .fanCurve:
+        curveEngine?.reset()
     }
 }
 

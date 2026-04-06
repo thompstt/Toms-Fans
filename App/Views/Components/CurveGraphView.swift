@@ -8,7 +8,6 @@ struct CurveGraphView: View {
     // Local drag state — only committed to binding on drag end
     @State private var dragPoints: [CurvePoint]?
     @State private var dragIndex: Int?
-    @State private var isHovering = false
 
     private let snapUnit: Double = 5
     private let tempMin: Double = 0
@@ -47,9 +46,6 @@ struct CurveGraphView: View {
                         commitDrag()
                     }
             )
-            .onHover { hovering in
-                isHovering = hovering
-            }
         }
     }
 

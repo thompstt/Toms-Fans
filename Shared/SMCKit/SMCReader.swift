@@ -10,6 +10,12 @@ final class SMCReader {
         self.connection = connection
     }
 
+    /// Clear cached key info. Call after reconnecting the SMC
+    /// so stale data-type lookups don't cause misreads.
+    func clearCache() {
+        keyInfoCache.removeAll()
+    }
+
     // MARK: - Key Info
 
     /// Get the data type and size for an SMC key (cached after first lookup).

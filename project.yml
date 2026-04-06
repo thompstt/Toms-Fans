@@ -23,6 +23,7 @@ targets:
       - path: Shared
         excludes:
           - "**/.DS_Store"
+      - path: Resources/Assets.xcassets
     dependencies:
       - target: com.tomsfans.helper
     settings:

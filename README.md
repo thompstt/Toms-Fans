@@ -14,7 +14,9 @@
 - **Menu bar mode** — run as a compact menu bar app with quick controls
 - **Notifications** — get alerts when temperatures exceed thresholds
 - **Dashboard** — at-a-glance view of all fans and temperatures with gauges and graphs
-- **Graceful sleep/wake** — automatically restores system fan control before sleep and re-applies your settings on wake
+- **Graceful sleep/wake** — automatically restores system fan control before sleep, reconnects to the SMC on wake, and re-applies your settings
+- **Error reporting** — transient toast notifications, persistent dashboard banners for critical issues, and a terminal-style error log in Settings
+- **Thermal safety** — automatically restores OS fan control if the SMC becomes unresponsive, the fan curve sensor disappears, or the helper connection is lost
 
 Lightweight — ~1–2% CPU on a 2019 i9 MacBook Pro, ~60 MB memory.
 
@@ -67,7 +69,7 @@ Enable menu-bar-only mode in Settings to hide the dock icon and run entirely fro
 
 ### Settings
 
-Configure temperature units, notification thresholds, launch-at-login, menu bar behavior, and helper tool management.
+Configure temperature units, notification thresholds, launch-at-login, menu bar behavior, and helper tool management. The Error Log section shows timestamped diagnostic messages from the current session.
 
 ## Architecture
 
@@ -90,7 +92,7 @@ Built entirely with Apple frameworks: SwiftUI, IOKit, ServiceManagement, UserNot
 
 **Use at your own risk.** Overriding system fan controls can cause hardware to overheat. This software is provided as-is with no warranty. The authors are not responsible for any hardware damage resulting from improper fan configuration.
 
-Always ensure adequate cooling. If temperatures rise beyond safe limits, the app will restore automatic fan control.
+The app includes multiple safety layers: it restores automatic fan control before sleep, on helper disconnection, when the configured curve sensor disappears, and after sustained SMC read failures. The Mac's SMC firmware also provides its own hardware-level thermal protection independent of any software.
 
 ## License
 

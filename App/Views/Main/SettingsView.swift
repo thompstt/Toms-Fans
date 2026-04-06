@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var helperInstall: HelperInstallService
+    @EnvironmentObject var errorLog: ErrorLog
 
     var body: some View {
         Form {
@@ -74,6 +75,51 @@ struct SettingsView: View {
                         }
                         .buttonStyle(.plain)
                     }
+                }
+            }
+
+            Section("Error Log") {
+                if errorLog.entries.isEmpty {
+                    Text("No errors recorded this session.")
+                        .foregroundStyle(.secondary)
+                        .font(.caption)
+                } else {
+                    HStack {
+                        Text("\(errorLog.entries.count) entries")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Spacer()
+                        Button("Clear") {
+                            errorLog.clearLog()
+                        }
+                        .font(.caption)
+                    }
+
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 2) {
+                            ForEach(errorLog.entries.reversed()) { entry in
+                                HStack(alignment: .top, spacing: 6) {
+                                    Text(entry.date, format: .dateTime.hour().minute().second())
+                                        .font(.system(.caption2, design: .monospaced))
+                                        .foregroundStyle(.secondary)
+                                        .frame(width: 70, alignment: .leading)
+
+                                    Text(entry.source.rawValue)
+                                        .font(.caption2.bold())
+                                        .foregroundStyle(entry.severity == .critical ? .red : .orange)
+                                        .frame(width: 30, alignment: .leading)
+
+                                    Text(entry.message)
+                                        .font(.system(.caption2, design: .monospaced))
+                                        .foregroundStyle(.primary)
+                                }
+                            }
+                        }
+                        .padding(8)
+                    }
+                    .frame(minHeight: 120, maxHeight: 200)
+                    .background(Color(nsColor: .textBackgroundColor))
+                    .clipShape(RoundedRectangle(cornerRadius: 6))
                 }
             }
 

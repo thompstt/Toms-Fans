@@ -27,7 +27,10 @@ final class SMCMonitorService: ObservableObject {
     private let maxHistoryDuration = TemperatureHistoryRange.maximumDuration
     private var readingCounter = 0
     private var pollCount = 0
+    private var consecutiveReadFailures = 0
 
+    var errorLog: ErrorLog?
+    var onSafetyRestore: (() -> Void)?
     var isCollectingHistory = true
 
     func clearHistory() {
@@ -84,8 +87,58 @@ final class SMCMonitorService: ObservableObject {
 
     func resumePolling() {
         guard timer == nil else { return }
-        startPolling()
-        poll()
+        reconnectAfterWake()
+    }
+
+    private func reconnectAfterWake(attempt: Int = 0) {
+        let delay: TimeInterval = attempt == 0 ? 1.0 : 2.0
+        DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + delay) { [weak self] in
+            guard let self, let reader = self.reader else { return }
+
+            // Reconnect — IOKit handle may be stale after sleep
+            do {
+                try self.connection.reconnect()
+            } catch {
+                if attempt < 2 {
+                    self.reconnectAfterWake(attempt: attempt + 1)
+                } else {
+                    DispatchQueue.main.async {
+                        self.isConnected = false
+                        self.errorLog?.setCondition(
+                            id: "smc.disconnected",
+                            message: "SMC connection lost after wake (\(error.localizedDescription))",
+                            source: .smc, severity: .critical
+                        )
+                    }
+                }
+                return
+            }
+            reader.clearCache()
+
+            // Re-discover fans (SMC may need a moment post-wake)
+            let fanCount = (try? reader.fanCount()) ?? 0
+            if fanCount == 0 && attempt < 2 {
+                self.reconnectAfterWake(attempt: attempt + 1)
+                return
+            }
+
+            let fanModels = (0..<fanCount).map { Fan(index: $0) }
+
+            DispatchQueue.main.async {
+                self.isConnected = true
+                self.errorLog?.clearCondition(id: "smc.disconnected")
+                self.errorLog?.clearCondition(id: "smc.reads_failing")
+                if !fanModels.isEmpty {
+                    self.fans = fanModels
+                    self.errorLog?.clearCondition(id: "smc.no_fans")
+                }
+                // Reset so static fan data (min/max) is read on next poll
+                self.pollCount = 0
+                self.consecutiveReadFailures = 0
+                self.startPolling()
+                self.poll()
+            }
+        }
     }
 
     func setIdleMode(_ idle: Bool) {
@@ -98,7 +151,7 @@ final class SMCMonitorService: ObservableObject {
 
     // MARK: - Private
 
-    private func discoverSensors() {
+    private func discoverSensors(attempt: Int = 0) {
         guard let reader else { return }
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
@@ -106,6 +159,14 @@ final class SMCMonitorService: ObservableObject {
 
             let sensors = (try? reader.discoverTemperatureSensors()) ?? []
             let fanCount = (try? reader.fanCount()) ?? 0
+
+            // Retry if SMC returned 0 fans (may still be initializing after wake)
+            if fanCount == 0 && attempt < 3 {
+                DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + 2.0) {
+                    self.discoverSensors(attempt: attempt + 1)
+                }
+                return
+            }
 
             let tempModels = sensors.map {
                 TemperatureSensor(key: $0.key, name: $0.name, value: $0.value)
@@ -117,6 +178,17 @@ final class SMCMonitorService: ObservableObject {
                 self.updateSummaryTemps(tempModels)
                 self.temperatures = tempModels
                 self.fans = fanModels
+
+                if fanCount == 0 {
+                    self.errorLog?.setCondition(
+                        id: "smc.no_fans",
+                        message: "No fans detected after \(attempt + 1) attempts",
+                        source: .smc, severity: .critical
+                    )
+                } else {
+                    self.errorLog?.clearCondition(id: "smc.no_fans")
+                }
+
                 self.poll()
             }
         }
@@ -134,12 +206,15 @@ final class SMCMonitorService: ObservableObject {
 
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             guard let self else { return }
+            var pollErrors: [String] = []
 
             // Read temperatures
             var updatedTemps = self.temperatures
             for i in updatedTemps.indices {
-                if let temp = try? reader.readTemperature(key: FourCharCode(updatedTemps[i].key)) {
-                    updatedTemps[i].value = temp
+                do {
+                    updatedTemps[i].value = try reader.readTemperature(key: FourCharCode(updatedTemps[i].key))
+                } catch {
+                    pollErrors.append("\(updatedTemps[i].key): \(error.localizedDescription)")
                 }
             }
 
@@ -148,13 +223,24 @@ final class SMCMonitorService: ObservableObject {
             var updatedFans = self.fans
             for i in updatedFans.indices {
                 let idx = updatedFans[i].index
-                updatedFans[i].actualRPM = (try? reader.fanActualSpeed(fanIndex: idx)) ?? 0
-                if readStaticFanData {
-                    updatedFans[i].minRPM = (try? reader.fanMinSpeed(fanIndex: idx)) ?? 0
-                    updatedFans[i].maxRPM = (try? reader.fanMaxSpeed(fanIndex: idx)) ?? 0
+                do {
+                    updatedFans[i].actualRPM = try reader.fanActualSpeed(fanIndex: idx)
+                } catch {
+                    pollErrors.append("Fan \(idx) speed: \(error.localizedDescription)")
                 }
-                if let (_, bytes) = try? reader.readKey(SMCKey.fanTarget(idx)) {
+                if readStaticFanData {
+                    do {
+                        updatedFans[i].minRPM = try reader.fanMinSpeed(fanIndex: idx)
+                        updatedFans[i].maxRPM = try reader.fanMaxSpeed(fanIndex: idx)
+                    } catch {
+                        pollErrors.append("Fan \(idx) range: \(error.localizedDescription)")
+                    }
+                }
+                do {
+                    let (_, bytes) = try reader.readKey(SMCKey.fanTarget(idx))
                     updatedFans[i].targetRPM = Double(flt: bytes)
+                } catch {
+                    // Target RPM is non-critical, don't add to pollErrors
                 }
             }
 
@@ -195,6 +281,36 @@ final class SMCMonitorService: ObservableObject {
                 // curve engine and notifications only care about temps
                 if tempsChanged {
                     self.onPoll?(updatedTemps)
+                }
+
+                // Track consecutive read failures for error reporting
+                if pollErrors.isEmpty {
+                    if self.consecutiveReadFailures > 0 {
+                        self.consecutiveReadFailures = 0
+                        self.errorLog?.clearCondition(id: "smc.reads_failing")
+                    }
+                } else {
+                    self.consecutiveReadFailures += 1
+                    if self.consecutiveReadFailures == 3 {
+                        for msg in Set(pollErrors) {
+                            self.errorLog?.logTransient(msg, source: .smc)
+                        }
+                    }
+                    if self.consecutiveReadFailures == 15 {
+                        self.errorLog?.setCondition(
+                            id: "smc.reads_failing",
+                            message: "SMC sensor reads are consistently failing",
+                            source: .smc, severity: .warning
+                        )
+                    }
+                    if self.consecutiveReadFailures == 30 {
+                        self.errorLog?.setCondition(
+                            id: "smc.reads_failing",
+                            message: "SMC unresponsive for 30s — restoring automatic fan control",
+                            source: .smc, severity: .critical
+                        )
+                        self.onSafetyRestore?()
+                    }
                 }
             }
         }

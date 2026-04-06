@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,6 +16,7 @@
 		1548BC62B3785B5812AE9C7F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9DE64C91E160A545A67D261 /* NotificationService.swift */; };
 		234F3CEA9811FC612B54E2D6 /* FanCurveEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A36AEEC2C746661963C6E8 /* FanCurveEngine.swift */; };
 		2BB2B362AC227D9A4FD4C11B /* FanControlServiceImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BD4B49B5E5C0CA001540EA4 /* FanControlServiceImpl.swift */; };
+		31672F9F495F100E81760861 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3AB4FF8F26B5750AC4CCC744 /* Assets.xcassets */; };
 		412A6D64228AF66BE90C5E1B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4448A8DA5AC1BD9B85CCE025 /* SettingsView.swift */; };
 		4743898FEC4B1278D4BF96BD /* XPCConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF3130A087432DF397B5E87 /* XPCConstants.swift */; };
 		527AFB1E80BA27C570AAE221 /* FanControlProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8862E4BF60D557267DAACB1B /* FanControlProtocol.swift */; };
@@ -23,9 +24,11 @@
 		5EAB3F01D928492FB577D966 /* MenuBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42C5AB8C9B0DFB91BF7A03A4 /* MenuBarView.swift */; };
 		61979395B5F21C9DE9DC0D8A /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1350EE35B143206D78C28EA3 /* AppSettings.swift */; };
 		63805D687FBB9AB9DF7EBD98 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5B14DFC218427E225920E0 /* ContentView.swift */; };
+		63AFBB0E5A5069A127D0FDE2 /* ErrorViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8A93648C6C49BC553A4CCA /* ErrorViews.swift */; };
 		6456DC6B4678801C722CC99F /* SMCKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504DD156ADB0771792AC76F2 /* SMCKeys.swift */; };
 		6F23BD7D3A97A4E6FA04B97E /* Fan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0619041B5B9D41741C5EF40 /* Fan.swift */; };
 		6F4C20439DA7CED612FE8801 /* FanControlProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8862E4BF60D557267DAACB1B /* FanControlProtocol.swift */; };
+		79E01E71B7E71A52DC50FA63 /* ErrorLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA401AF3AE2023682278131 /* ErrorLog.swift */; };
 		819E01693DFDA484D79059A0 /* SMCReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27B1B34C8C83BF04EE5C331 /* SMCReader.swift */; };
 		936822D28693FA51A5C14F64 /* FanCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367EFD32C8E1FB6C9208D008 /* FanCurve.swift */; };
 		956DA0A7FCB412EBAE68F929 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F594212A424DF3E5F5BB4B5 /* DashboardView.swift */; };
@@ -37,7 +40,6 @@
 		DB8288A37CF554408F7515F3 /* XPCFanControlService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D52E5A1B7F1A476FE09B0FB /* XPCFanControlService.swift */; };
 		E1C75D9776913672B774A665 /* FanGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD97A3BEA02C21155F67BB1 /* FanGaugeView.swift */; };
 		E36FF662E3758F8787E80AFC /* com.tomsfans.helper in Resources */ = {isa = PBXBuildFile; fileRef = 1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		E4A1B2C3D4E5F6A7B8C9D0E1 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6A7B8C9D0E1F2 /* Assets.xcassets */; };
 		E59777273B4523139A6F6A8D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE415AA3D435351A841DFE9 /* main.swift */; };
 		E73C2C6489843CD0876B33C7 /* SMCConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30F64B6BCCF8BDA8FE5CED0 /* SMCConnection.swift */; };
 		E83FDD325CB860AA5DA5F15F /* SMCParamStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = B661B702991170974ED7A8AB /* SMCParamStruct.swift */; };
@@ -58,12 +60,13 @@
 
 /* Begin PBXFileReference section */
 		0BD4B49B5E5C0CA001540EA4 /* FanControlServiceImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanControlServiceImpl.swift; sourceTree = "<group>"; };
-		A1B2C3D4E5F6A7B8C9D0E1F2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0DA401AF3AE2023682278131 /* ErrorLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorLog.swift; sourceTree = "<group>"; };
 		1350EE35B143206D78C28EA3 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
-		1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = com.tomsfans.helper; sourceTree = BUILT_PRODUCTS_DIR; };
+		1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */ = {isa = PBXFileReference; includeInIndex = 0; path = com.tomsfans.helper; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A5B14DFC218427E225920E0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		2D52E5A1B7F1A476FE09B0FB /* XPCFanControlService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCFanControlService.swift; sourceTree = "<group>"; };
 		367EFD32C8E1FB6C9208D008 /* FanCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanCurve.swift; sourceTree = "<group>"; };
+		3AB4FF8F26B5750AC4CCC744 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3B45F4A8485D4BDCD09F86B8 /* SMCMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCMonitorService.swift; sourceTree = "<group>"; };
 		42C5AB8C9B0DFB91BF7A03A4 /* MenuBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuBarView.swift; sourceTree = "<group>"; };
 		4448A8DA5AC1BD9B85CCE025 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -83,6 +86,7 @@
 		B661B702991170974ED7A8AB /* SMCParamStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCParamStruct.swift; sourceTree = "<group>"; };
 		BAE415AA3D435351A841DFE9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C393F63AFB49415739ABD0EE /* CurveGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveGraphView.swift; sourceTree = "<group>"; };
+		CA8A93648C6C49BC553A4CCA /* ErrorViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorViews.swift; sourceTree = "<group>"; };
 		D9A480F8D73D80FBDD54BB74 /* Tom's Fans.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tom's Fans.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		DD89D062381E576085C285DD /* HelperInstallService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperInstallService.swift; sourceTree = "<group>"; };
 		E9DE64C91E160A545A67D261 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
@@ -96,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				C393F63AFB49415739ABD0EE /* CurveGraphView.swift */,
+				CA8A93648C6C49BC553A4CCA /* ErrorViews.swift */,
 				ECD97A3BEA02C21155F67BB1 /* FanGaugeView.swift */,
 				64D4A6784286D9754A99A1B4 /* TemperatureChartView.swift */,
 			);
@@ -135,6 +140,7 @@
 		4FEF9CDA4C7AF115FDCCCFAD /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				0DA401AF3AE2023682278131 /* ErrorLog.swift */,
 				69A36AEEC2C746661963C6E8 /* FanCurveEngine.swift */,
 				DD89D062381E576085C285DD /* HelperInstallService.swift */,
 				E9DE64C91E160A545A67D261 /* NotificationService.swift */,
@@ -181,23 +187,23 @@
 			path = Main;
 			sourceTree = "<group>";
 		};
+		B23FF4AEB028B0F597D95AA5 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				3AB4FF8F26B5750AC4CCC744 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
 		CEE092C3F2129E5E66227D90 = {
 			isa = PBXGroup;
 			children = (
 				F8B1B5F085997F5A8AE57736 /* App */,
 				87F307F4C2ECB22AF34009D4 /* Helper */,
-				C1D2E3F4A5B6C7D8E9F0A1B2 /* Resources */,
+				B23FF4AEB028B0F597D95AA5 /* Resources */,
 				3461145C1DF0A8C79F006732 /* Shared */,
 				34CA9F8322AF118473CD6297 /* Products */,
 			);
-			sourceTree = "<group>";
-		};
-		C1D2E3F4A5B6C7D8E9F0A1B2 /* Resources */ = {
-			isa = PBXGroup;
-			children = (
-				A1B2C3D4E5F6A7B8C9D0E1F2 /* Assets.xcassets */,
-			);
-			path = Resources;
 			sourceTree = "<group>";
 		};
 		D60B19DBBC3361D45EC03D60 /* Views */ = {
@@ -303,6 +309,7 @@
 			);
 			mainGroup = CEE092C3F2129E5E66227D90;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -317,7 +324,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E4A1B2C3D4E5F6A7B8C9D0E1 /* Assets.xcassets in Resources */,
+				31672F9F495F100E81760861 /* Assets.xcassets in Resources */,
 				E36FF662E3758F8787E80AFC /* com.tomsfans.helper in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -371,6 +378,8 @@
 				63805D687FBB9AB9DF7EBD98 /* ContentView.swift in Sources */,
 				D38920FB74BB0C1C433C4F51 /* CurveGraphView.swift in Sources */,
 				956DA0A7FCB412EBAE68F929 /* DashboardView.swift in Sources */,
+				79E01E71B7E71A52DC50FA63 /* ErrorLog.swift in Sources */,
+				63AFBB0E5A5069A127D0FDE2 /* ErrorViews.swift in Sources */,
 				6F23BD7D3A97A4E6FA04B97E /* Fan.swift in Sources */,
 				6F4C20439DA7CED612FE8801 /* FanControlProtocol.swift in Sources */,
 				936822D28693FA51A5C14F64 /* FanCurve.swift in Sources */,
@@ -474,7 +483,6 @@
 				MACOSX_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
-				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_COMPILATION_MODE = wholemodule;

@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct ContentView: View {
+    @EnvironmentObject var errorLog: ErrorLog
     @State private var selectedTab = 0
 
     var body: some View {
@@ -14,5 +15,14 @@ struct ContentView: View {
                 .tabItem { Label("Settings", systemImage: "gear") }
         }
         .frame(minWidth: 700, minHeight: 500)
+        .overlay(alignment: .top) {
+            if let toast = errorLog.currentToast {
+                ErrorToastView(entry: toast) {
+                    errorLog.dismissToast()
+                }
+                .padding(.top, 8)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: errorLog.currentToast?.id)
     }
 }

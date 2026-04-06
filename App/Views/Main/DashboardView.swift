@@ -349,6 +349,7 @@ struct DashboardView: View {
     @EnvironmentObject var fanControl: XPCFanControlService
     @EnvironmentObject var curveEngine: FanCurveEngine
     @EnvironmentObject var settings: AppSettings
+    @EnvironmentObject var errorLog: ErrorLog
     @State private var chartSensorKeys: Set<String> = ["TCXC", "TG0P"]
     @State private var expandedCategories: Set<SensorCategory> = []
     @State private var manualSpeeds: [Int: Double] = [:]
@@ -384,6 +385,17 @@ struct DashboardView: View {
     private var mainPanel: some View {
         ScrollView {
             LazyVStack(alignment: .center, spacing: 12) {
+                if !errorLog.activeConditions.isEmpty {
+                    ErrorBannerView(conditions: errorLog.activeConditions)
+                } else if !monitor.isConnected {
+                    ErrorBannerView(conditions: [
+                        "smc.disconnected": ErrorEntry(
+                            date: Date(), source: .smc, severity: .critical,
+                            message: "SMC connection failed — temperature monitoring unavailable"
+                        )
+                    ])
+                }
+
                 SummaryStripView(
                     cpuTemp: monitor.cpuPackageTemp,
                     gpuTemp: monitor.gpuTemp,
@@ -434,12 +446,6 @@ struct DashboardView: View {
                     fanCurveSection
                 }
 
-                if let error = fanControl.lastError {
-                    GroupBox {
-                        Label(error, systemImage: "exclamationmark.triangle.fill")
-                            .foregroundStyle(.red)
-                    }
-                }
             }
             .padding(12)
         }
