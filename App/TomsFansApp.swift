@@ -93,6 +93,7 @@ struct TomsFansApp: App {
         reapplySavedMode()
         observePollIntervalChanges()
         observeSleepWake()
+        observeCulpritChanges()
         #if DEBUG
         ProcessMonitorDebugHarness.run()
         #endif
@@ -124,6 +125,23 @@ struct TomsFansApp: App {
                 monitor?.resumePolling()
                 guard let settings, let fanControl else { return }
                 reapplyMode(settings: settings, fanControl: fanControl, curveEngine: curveEngine)
+            }
+            .store(in: &Self.cancellables)
+    }
+
+    private func observeCulpritChanges() {
+        processMonitor.$culprit
+            .compactMap { $0 }
+            .removeDuplicates()
+            .sink { [weak notifications] culprit in
+                switch culprit {
+                case .candidate(let pid, let name, let raw):
+                    notifications?.notifyCulprit(name: name, pid: pid, rawPct: raw)
+                case .degraded(let reason):
+                    notifications?.notifyDegraded(reason: reason)
+                case .macOSCooling, .noCPUSource:
+                    break
+                }
             }
             .store(in: &Self.cancellables)
     }
