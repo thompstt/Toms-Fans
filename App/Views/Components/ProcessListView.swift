@@ -3,6 +3,7 @@ import SwiftUI
 struct ProcessListView: View {
     let samples: [ProcessSample]
     let hostCPUPercent: Double
+    let isDegraded: Bool
     @Binding var displayMode: CPUDisplayMode
 
     var body: some View {
@@ -33,6 +34,16 @@ struct ProcessListView: View {
             Text("System: \(Int(hostCPUPercent))%")
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(.secondary)
+
+            if isDegraded {
+                Text("Limited data")
+                    .font(.caption.bold())
+                    .foregroundStyle(.orange)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(Color.orange.opacity(0.15))
+                    .clipShape(Capsule())
+            }
         }
     }
 

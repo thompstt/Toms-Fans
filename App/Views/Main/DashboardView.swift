@@ -466,6 +466,10 @@ struct DashboardView: View {
                     ProcessListView(
                         samples: processMonitor.samples,
                         hostCPUPercent: processMonitor.hostCPUPercent,
+                        isDegraded: {
+                            if case .degraded = processMonitor.culprit { return true }
+                            return false
+                        }(),
                         displayMode: Binding(
                             get: { settings.cpuDisplayMode },
                             set: { settings.cpuDisplayMode = $0 }

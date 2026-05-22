@@ -8,6 +8,9 @@ final class ProcessMonitorService: ObservableObject {
     @Published private(set) var culprit: ProcessCulprit?
 
     var errorLog: ErrorLog?
+    /// Called on the main queue when degraded-mode is first entered.
+    /// `TomsFansApp` wires this to `remediation.resumeAllSuspended()`.
+    var onDegradedEntry: (() -> Void)?
 
     /// Foreground = full enumeration + ring buffer; background = top-N, no buffer.
     private(set) var foregroundMode = false
@@ -145,6 +148,7 @@ final class ProcessMonitorService: ObservableObject {
                             "Process monitoring degraded — \(degradedReasonSnapshot ?? "unknown reason")",
                             source: .process
                         )
+                        self.onDegradedEntry?()
                     }
                     self.correlator.reset()
                     self.culprit = .degraded(reason: degradedReasonSnapshot ?? "untrusted sample")

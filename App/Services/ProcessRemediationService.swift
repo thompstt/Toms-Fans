@@ -20,6 +20,10 @@ final class ProcessRemediationService: ObservableObject {
 
     /// SIGTERM, then SIGKILL escalation after 3 s if still alive.
     func terminate(pid: pid_t, name: String) {
+        guard !ThermalCorrelator.neverRankNames.contains(name) else {
+            errorLog?.logTransient("Refused to signal protected process \(name)", source: .process)
+            return
+        }
         guard let xpc else {
             errorLog?.logTransient("Cannot terminate \(name) — helper not connected", source: .process)
             return
@@ -39,12 +43,20 @@ final class ProcessRemediationService: ObservableObject {
 
     /// Immediate SIGKILL — no escalation. Caller is responsible for confirmation UX.
     func forceQuit(pid: pid_t, name: String) {
+        guard !ThermalCorrelator.neverRankNames.contains(name) else {
+            errorLog?.logTransient("Refused to signal protected process \(name)", source: .process)
+            return
+        }
         xpc?.sendSignal(SIGKILL, toPID: pid) { _, _ in }
     }
 
     /// SIGSTOP the PID. Auto-resumes after 10s OR when any monitored temperature
     /// drops by 5°C from the suspend-time snapshot (whichever comes first).
     func throttle(pid: pid_t, name: String, currentTemps: [String: Double]) {
+        guard !ThermalCorrelator.neverRankNames.contains(name) else {
+            errorLog?.logTransient("Refused to signal protected process \(name)", source: .process)
+            return
+        }
         guard let xpc else {
             errorLog?.logTransient("Cannot throttle \(name) — helper not connected", source: .process)
             return

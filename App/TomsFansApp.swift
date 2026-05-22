@@ -84,6 +84,9 @@ struct TomsFansApp: App {
         processMonitor.errorLog = errorLog
         remediation.errorLog = errorLog
         remediation.xpc = fanControl
+        processMonitor.onDegradedEntry = { [weak remediation] in
+            remediation?.resumeAllSuspended()
+        }
         AppDelegate.remediation = remediation
         monitor.updatePollInterval(settings.pollInterval)
         setupPollCallback()
