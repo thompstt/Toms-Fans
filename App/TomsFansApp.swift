@@ -14,6 +14,7 @@ struct TomsFansApp: App {
     @StateObject private var notifications = NotificationService()
     @StateObject private var errorLog = ErrorLog()
     @StateObject private var processMonitor = ProcessMonitorService()
+    @StateObject private var remediation = ProcessRemediationService()
 
     var body: some Scene {
         Window("Tom's Fans", id: "main") {
@@ -26,6 +27,7 @@ struct TomsFansApp: App {
                 .environmentObject(notifications)
                 .environmentObject(errorLog)
                 .environmentObject(processMonitor)
+                .environmentObject(remediation)
                 .onAppear {
                     bootstrapIfNeeded()
                     monitor.isCollectingHistory = true
@@ -80,6 +82,8 @@ struct TomsFansApp: App {
         fanControl.errorLog = errorLog
         curveEngine.errorLog = errorLog
         processMonitor.errorLog = errorLog
+        remediation.errorLog = errorLog
+        remediation.xpc = fanControl
         monitor.updatePollInterval(settings.pollInterval)
         setupPollCallback()
         setupProcessSamplingCallback()

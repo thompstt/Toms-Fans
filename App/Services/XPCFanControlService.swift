@@ -90,4 +90,18 @@ final class XPCFanControlService: ObservableObject {
             }
         }
     }
+
+    /// Send a POSIX signal to a PID via the helper.
+    /// `completion` runs on the main queue with (success, optional error message).
+    func sendSignal(_ signal: Int32, toPID pid: pid_t,
+                    completion: @escaping (Bool, String?) -> Void) {
+        proxy?.sendSignal(signal, toPID: pid) { [weak self] success, error in
+            DispatchQueue.main.async {
+                if !success, let error {
+                    self?.errorLog?.logTransient(error, source: .xpc)
+                }
+                completion(success, error)
+            }
+        }
+    }
 }
