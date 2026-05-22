@@ -13,6 +13,7 @@ struct TomsFansApp: App {
     @StateObject private var settings = AppSettings()
     @StateObject private var notifications = NotificationService()
     @StateObject private var errorLog = ErrorLog()
+    @StateObject private var processMonitor = ProcessMonitorService()
 
     var body: some Scene {
         Window("Tom's Fans", id: "main") {
@@ -24,6 +25,7 @@ struct TomsFansApp: App {
                 .environmentObject(settings)
                 .environmentObject(notifications)
                 .environmentObject(errorLog)
+                .environmentObject(processMonitor)
                 .onAppear {
                     bootstrapIfNeeded()
                     monitor.isCollectingHistory = true
@@ -75,8 +77,10 @@ struct TomsFansApp: App {
         monitor.errorLog = errorLog
         fanControl.errorLog = errorLog
         curveEngine.errorLog = errorLog
+        processMonitor.errorLog = errorLog
         monitor.updatePollInterval(settings.pollInterval)
         setupPollCallback()
+        setupProcessSamplingCallback()
         setupSafetyCallbacks()
         notifications.setup()
         reapplySavedMode()
@@ -133,6 +137,13 @@ struct TomsFansApp: App {
             }
 
             notifications?.checkThresholds(temperatures: temps, thresholds: settings.alertThresholds)
+        }
+    }
+
+    private func setupProcessSamplingCallback() {
+        monitor.onPollAlways = { [weak processMonitor, weak settings] in
+            guard settings?.processMonitoringEnabled == true else { return }
+            processMonitor?.sample()
         }
     }
 
