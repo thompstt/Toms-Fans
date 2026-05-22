@@ -39,6 +39,10 @@ final class SMCMonitorService: ObservableObject {
     }
 
     var onPoll: (([TemperatureSensor]) -> Void)?
+    /// Fires on every poll tick, regardless of temperature delta.
+    /// Use for samplers that need a heartbeat independent of temperature changes
+    /// (e.g. process sampling, where load is a leading indicator of heat).
+    var onPollAlways: (() -> Void)?
 
     // MARK: - Cached Summary Temps (updated during poll, no allocations on read)
 
@@ -282,6 +286,9 @@ final class SMCMonitorService: ObservableObject {
                 if tempsChanged {
                     self.onPoll?(updatedTemps)
                 }
+
+                // Always-fires heartbeat for samplers that don't depend on temp changes.
+                self.onPollAlways?()
 
                 // Track consecutive read failures for error reporting
                 if pollErrors.isEmpty {
