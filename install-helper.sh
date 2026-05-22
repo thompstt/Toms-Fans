@@ -16,9 +16,22 @@ fi
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Find the built helper binary
+# Ask xcodebuild which DerivedData directory matches THIS project,
+# so a worktree's install doesn't accidentally pick the parent repo's build.
 DERIVED_DATA="$HOME/Library/Developer/Xcode/DerivedData"
-HELPER_PATH=$(find "$DERIVED_DATA" -name "com.tomsfans.helper" -type f -path "*/Debug/*" 2>/dev/null | head -1)
+PROJECT_BUILD_DIR=$(xcodebuild -project "$SCRIPT_DIR/Tom's Fans.xcodeproj" -showBuildSettings -scheme "com.tomsfans.helper" -configuration Debug 2>/dev/null \
+    | awk '/^[[:space:]]*BUILT_PRODUCTS_DIR =/ { print $3; exit }')
+HELPER_PATH=""
+if [ -n "$PROJECT_BUILD_DIR" ] && [ -f "$PROJECT_BUILD_DIR/com.tomsfans.helper" ]; then
+    HELPER_PATH="$PROJECT_BUILD_DIR/com.tomsfans.helper"
+fi
+
+# Fall back to the most-recently-modified helper anywhere in DerivedData.
+if [ -z "$HELPER_PATH" ]; then
+    HELPER_PATH=$(find "$DERIVED_DATA" -name "com.tomsfans.helper" -type f -path "*/Debug/*" 2>/dev/null \
+        | xargs -I {} stat -f "%m %N" {} \
+        | sort -nr | head -1 | cut -d' ' -f2-)
+fi
 
 if [ -z "$HELPER_PATH" ]; then
     echo "Error: Could not find built helper binary."
