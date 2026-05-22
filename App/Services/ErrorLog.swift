@@ -13,6 +13,7 @@ struct ErrorEntry: Identifiable {
 enum ErrorSource: String {
     case smc = "SMC"
     case xpc = "XPC"
+    case process = "Process"
 }
 
 enum ErrorSeverity: Comparable {

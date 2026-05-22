@@ -1,6 +1,12 @@
 import Foundation
 import ServiceManagement
 
+enum CPUDisplayMode: String, CaseIterable, Identifiable {
+    case raw1600 = "raw"
+    case normalized100 = "normalized"
+    var id: String { rawValue }
+}
+
 enum TemperatureHistoryRange: Int, CaseIterable, Identifiable {
     case oneMinute = 60
     case threeMinutes = 180
@@ -82,6 +88,15 @@ final class AppSettings: ObservableObject {
             toggleLaunchAtLogin()
         }
     }
+    @Published var processMonitoringEnabled: Bool {
+        didSet { UserDefaults.standard.set(processMonitoringEnabled, forKey: "processMonitoringEnabled") }
+    }
+    @Published var remediationEnabled: Bool {
+        didSet { UserDefaults.standard.set(remediationEnabled, forKey: "remediationEnabled") }
+    }
+    @Published var cpuDisplayMode: CPUDisplayMode {
+        didSet { UserDefaults.standard.set(cpuDisplayMode.rawValue, forKey: "cpuDisplayMode") }
+    }
 
     enum TemperatureUnit: String, CaseIterable, Identifiable {
         case celsius, fahrenheit
@@ -118,6 +133,10 @@ final class AppSettings: ObservableObject {
         self.temperatureUnit = TemperatureUnit(rawValue:
             UserDefaults.standard.string(forKey: "tempUnit") ?? "celsius") ?? .celsius
         self.launchAtLogin = false
+        self.processMonitoringEnabled = (UserDefaults.standard.object(forKey: "processMonitoringEnabled") as? Bool) ?? true
+        self.remediationEnabled = (UserDefaults.standard.object(forKey: "remediationEnabled") as? Bool) ?? false
+        self.cpuDisplayMode = CPUDisplayMode(rawValue:
+            UserDefaults.standard.string(forKey: "cpuDisplayMode") ?? "normalized") ?? .normalized100
         refreshLaunchAtLoginState()
 
         // Persist default fan curves if they were just created (init doesn't trigger didSet)

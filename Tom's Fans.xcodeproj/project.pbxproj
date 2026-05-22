@@ -12,11 +12,15 @@
 		0D5257C515CD60051D8FDE91 /* SMCDataTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8C404EAE5CF273E24394AC3 /* SMCDataTypes.swift */; };
 		10CEFDF9A8F7C5FF5872BF75 /* SMCKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504DD156ADB0771792AC76F2 /* SMCKeys.swift */; };
 		10E7DF8F0B1CE3459419CE83 /* FanPreset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50616D09B446D513C161EEDC /* FanPreset.swift */; };
+		1160E250B5E5F875859EE75C /* ThermalCorrelator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2EE7ACC09D36424C6837051 /* ThermalCorrelator.swift */; };
 		12B14A77061E372D7B78BCFA /* FanControlDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6EF00180A73D7F01A2E834B /* FanControlDelegate.swift */; };
 		1548BC62B3785B5812AE9C7F /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9DE64C91E160A545A67D261 /* NotificationService.swift */; };
+		19AFDA9813D050E0BCC4B6CB /* CulpritCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02416415CF3FF88E5D8736AD /* CulpritCardView.swift */; };
+		2040C4CA63FF7B8EBE0763F3 /* ProcessMonitorDebugHarness.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0A3C67D3958D1A064CCF21 /* ProcessMonitorDebugHarness.swift */; };
 		234F3CEA9811FC612B54E2D6 /* FanCurveEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69A36AEEC2C746661963C6E8 /* FanCurveEngine.swift */; };
 		2BB2B362AC227D9A4FD4C11B /* FanControlServiceImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BD4B49B5E5C0CA001540EA4 /* FanControlServiceImpl.swift */; };
 		31672F9F495F100E81760861 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3AB4FF8F26B5750AC4CCC744 /* Assets.xcassets */; };
+		371E65A2876B76BC852136AC /* ProcessListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D79907F6D7749C6CC189089 /* ProcessListView.swift */; };
 		412A6D64228AF66BE90C5E1B /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4448A8DA5AC1BD9B85CCE025 /* SettingsView.swift */; };
 		4743898FEC4B1278D4BF96BD /* XPCConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF3130A087432DF397B5E87 /* XPCConstants.swift */; };
 		527AFB1E80BA27C570AAE221 /* FanControlProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8862E4BF60D557267DAACB1B /* FanControlProtocol.swift */; };
@@ -31,11 +35,15 @@
 		79E01E71B7E71A52DC50FA63 /* ErrorLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA401AF3AE2023682278131 /* ErrorLog.swift */; };
 		819E01693DFDA484D79059A0 /* SMCReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27B1B34C8C83BF04EE5C331 /* SMCReader.swift */; };
 		936822D28693FA51A5C14F64 /* FanCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367EFD32C8E1FB6C9208D008 /* FanCurve.swift */; };
+		95534AD6B518364C5A74824B /* ProcessSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = D191317BAB748D5EF1BC5312 /* ProcessSample.swift */; };
 		956DA0A7FCB412EBAE68F929 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F594212A424DF3E5F5BB4B5 /* DashboardView.swift */; };
 		A38CADFD2BEFC9F4EFE306AD /* TomsFansApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BD33CB03F2B0D2B0DFDC2D /* TomsFansApp.swift */; };
+		A848839D582991CCC24117C0 /* ProcessCulprit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 322115D488328C9C9468E93E /* ProcessCulprit.swift */; };
 		B0BE4EA15B9C9E2B510A55C1 /* TemperatureChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D4A6784286D9754A99A1B4 /* TemperatureChartView.swift */; };
+		B5ADA017B3FC5A0570E0A540 /* ProcessMonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02705BD5E78EAD0AD4E02D09 /* ProcessMonitorService.swift */; };
 		BFCA3CE71EB259F8CE4A89F8 /* HelperInstallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD89D062381E576085C285DD /* HelperInstallService.swift */; };
 		CCB6D162B0C7ACB37E8AB0A2 /* SMCDataTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8C404EAE5CF273E24394AC3 /* SMCDataTypes.swift */; };
+		D2C22922161412DF82D40055 /* ProcessSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09142E6DFC01A6B96F36AD7 /* ProcessSampler.swift */; };
 		D38920FB74BB0C1C433C4F51 /* CurveGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C393F63AFB49415739ABD0EE /* CurveGraphView.swift */; };
 		DB8288A37CF554408F7515F3 /* XPCFanControlService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D52E5A1B7F1A476FE09B0FB /* XPCFanControlService.swift */; };
 		E1C75D9776913672B774A665 /* FanGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD97A3BEA02C21155F67BB1 /* FanGaugeView.swift */; };
@@ -46,6 +54,7 @@
 		ED122093928061C110382EDE /* XPCConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF3130A087432DF397B5E87 /* XPCConstants.swift */; };
 		F0662CFA6A4FC1F6E62CC270 /* SMCConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30F64B6BCCF8BDA8FE5CED0 /* SMCConnection.swift */; };
 		F73A2C2632BC87A18EAC1F39 /* SMCParamStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = B661B702991170974ED7A8AB /* SMCParamStruct.swift */; };
+		FB519AB1796710EABC5FACD0 /* ProcessRemediationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAB006D8687176C04D2833C6 /* ProcessRemediationService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,12 +68,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		02416415CF3FF88E5D8736AD /* CulpritCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CulpritCardView.swift; sourceTree = "<group>"; };
+		02705BD5E78EAD0AD4E02D09 /* ProcessMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMonitorService.swift; sourceTree = "<group>"; };
 		0BD4B49B5E5C0CA001540EA4 /* FanControlServiceImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanControlServiceImpl.swift; sourceTree = "<group>"; };
+		0C0A3C67D3958D1A064CCF21 /* ProcessMonitorDebugHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMonitorDebugHarness.swift; sourceTree = "<group>"; };
 		0DA401AF3AE2023682278131 /* ErrorLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorLog.swift; sourceTree = "<group>"; };
 		1350EE35B143206D78C28EA3 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
 		1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */ = {isa = PBXFileReference; includeInIndex = 0; path = com.tomsfans.helper; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A5B14DFC218427E225920E0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		2D52E5A1B7F1A476FE09B0FB /* XPCFanControlService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCFanControlService.swift; sourceTree = "<group>"; };
+		322115D488328C9C9468E93E /* ProcessCulprit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessCulprit.swift; sourceTree = "<group>"; };
 		367EFD32C8E1FB6C9208D008 /* FanCurve.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanCurve.swift; sourceTree = "<group>"; };
 		3AB4FF8F26B5750AC4CCC744 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		3B45F4A8485D4BDCD09F86B8 /* SMCMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCMonitorService.swift; sourceTree = "<group>"; };
@@ -78,16 +91,21 @@
 		69A36AEEC2C746661963C6E8 /* FanCurveEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanCurveEngine.swift; sourceTree = "<group>"; };
 		6AD201BF0F34D1662E3DAD6C /* TemperatureSensor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureSensor.swift; sourceTree = "<group>"; };
 		8862E4BF60D557267DAACB1B /* FanControlProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanControlProtocol.swift; sourceTree = "<group>"; };
+		9D79907F6D7749C6CC189089 /* ProcessListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessListView.swift; sourceTree = "<group>"; };
 		A0619041B5B9D41741C5EF40 /* Fan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fan.swift; sourceTree = "<group>"; };
 		A08F4B77B2A9C23A0078CE2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A6EF00180A73D7F01A2E834B /* FanControlDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanControlDelegate.swift; sourceTree = "<group>"; };
+		B09142E6DFC01A6B96F36AD7 /* ProcessSampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessSampler.swift; sourceTree = "<group>"; };
 		B27B1B34C8C83BF04EE5C331 /* SMCReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCReader.swift; sourceTree = "<group>"; };
 		B2BD33CB03F2B0D2B0DFDC2D /* TomsFansApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TomsFansApp.swift; sourceTree = "<group>"; };
+		B2EE7ACC09D36424C6837051 /* ThermalCorrelator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalCorrelator.swift; sourceTree = "<group>"; };
 		B661B702991170974ED7A8AB /* SMCParamStruct.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCParamStruct.swift; sourceTree = "<group>"; };
 		BAE415AA3D435351A841DFE9 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		C393F63AFB49415739ABD0EE /* CurveGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurveGraphView.swift; sourceTree = "<group>"; };
 		CA8A93648C6C49BC553A4CCA /* ErrorViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorViews.swift; sourceTree = "<group>"; };
+		D191317BAB748D5EF1BC5312 /* ProcessSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessSample.swift; sourceTree = "<group>"; };
 		D9A480F8D73D80FBDD54BB74 /* Tom's Fans.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Tom's Fans.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		DAB006D8687176C04D2833C6 /* ProcessRemediationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessRemediationService.swift; sourceTree = "<group>"; };
 		DD89D062381E576085C285DD /* HelperInstallService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperInstallService.swift; sourceTree = "<group>"; };
 		E9DE64C91E160A545A67D261 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		ECD97A3BEA02C21155F67BB1 /* FanGaugeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanGaugeView.swift; sourceTree = "<group>"; };
@@ -99,9 +117,11 @@
 		2054A4C542E17E4E43147839 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				02416415CF3FF88E5D8736AD /* CulpritCardView.swift */,
 				C393F63AFB49415739ABD0EE /* CurveGraphView.swift */,
 				CA8A93648C6C49BC553A4CCA /* ErrorViews.swift */,
 				ECD97A3BEA02C21155F67BB1 /* FanGaugeView.swift */,
+				9D79907F6D7749C6CC189089 /* ProcessListView.swift */,
 				64D4A6784286D9754A99A1B4 /* TemperatureChartView.swift */,
 			);
 			path = Components;
@@ -144,7 +164,11 @@
 				69A36AEEC2C746661963C6E8 /* FanCurveEngine.swift */,
 				DD89D062381E576085C285DD /* HelperInstallService.swift */,
 				E9DE64C91E160A545A67D261 /* NotificationService.swift */,
+				02705BD5E78EAD0AD4E02D09 /* ProcessMonitorService.swift */,
+				DAB006D8687176C04D2833C6 /* ProcessRemediationService.swift */,
+				B09142E6DFC01A6B96F36AD7 /* ProcessSampler.swift */,
 				3B45F4A8485D4BDCD09F86B8 /* SMCMonitorService.swift */,
+				B2EE7ACC09D36424C6837051 /* ThermalCorrelator.swift */,
 				2D52E5A1B7F1A476FE09B0FB /* XPCFanControlService.swift */,
 			);
 			path = Services;
@@ -175,6 +199,14 @@
 				BAE415AA3D435351A841DFE9 /* main.swift */,
 			);
 			path = Helper;
+			sourceTree = "<group>";
+		};
+		A47CE742566DFC03B19CF058 /* Debug */ = {
+			isa = PBXGroup;
+			children = (
+				0C0A3C67D3958D1A064CCF21 /* ProcessMonitorDebugHarness.swift */,
+			);
+			path = Debug;
 			sourceTree = "<group>";
 		};
 		B1B18F708DAA2F6FAEEFDE28 /* Main */ = {
@@ -223,6 +255,8 @@
 				A0619041B5B9D41741C5EF40 /* Fan.swift */,
 				367EFD32C8E1FB6C9208D008 /* FanCurve.swift */,
 				50616D09B446D513C161EEDC /* FanPreset.swift */,
+				322115D488328C9C9468E93E /* ProcessCulprit.swift */,
+				D191317BAB748D5EF1BC5312 /* ProcessSample.swift */,
 				6AD201BF0F34D1662E3DAD6C /* TemperatureSensor.swift */,
 			);
 			path = Models;
@@ -233,6 +267,7 @@
 			children = (
 				A08F4B77B2A9C23A0078CE2F /* Info.plist */,
 				B2BD33CB03F2B0D2B0DFDC2D /* TomsFansApp.swift */,
+				A47CE742566DFC03B19CF058 /* Debug */,
 				EC112624D95401A8E076A410 /* Models */,
 				4FEF9CDA4C7AF115FDCCCFAD /* Services */,
 				D60B19DBBC3361D45EC03D60 /* Views */,
@@ -376,6 +411,7 @@
 			files = (
 				61979395B5F21C9DE9DC0D8A /* AppSettings.swift in Sources */,
 				63805D687FBB9AB9DF7EBD98 /* ContentView.swift in Sources */,
+				19AFDA9813D050E0BCC4B6CB /* CulpritCardView.swift in Sources */,
 				D38920FB74BB0C1C433C4F51 /* CurveGraphView.swift in Sources */,
 				956DA0A7FCB412EBAE68F929 /* DashboardView.swift in Sources */,
 				79E01E71B7E71A52DC50FA63 /* ErrorLog.swift in Sources */,
@@ -389,6 +425,13 @@
 				BFCA3CE71EB259F8CE4A89F8 /* HelperInstallService.swift in Sources */,
 				5EAB3F01D928492FB577D966 /* MenuBarView.swift in Sources */,
 				1548BC62B3785B5812AE9C7F /* NotificationService.swift in Sources */,
+				A848839D582991CCC24117C0 /* ProcessCulprit.swift in Sources */,
+				371E65A2876B76BC852136AC /* ProcessListView.swift in Sources */,
+				2040C4CA63FF7B8EBE0763F3 /* ProcessMonitorDebugHarness.swift in Sources */,
+				B5ADA017B3FC5A0570E0A540 /* ProcessMonitorService.swift in Sources */,
+				FB519AB1796710EABC5FACD0 /* ProcessRemediationService.swift in Sources */,
+				95534AD6B518364C5A74824B /* ProcessSample.swift in Sources */,
+				D2C22922161412DF82D40055 /* ProcessSampler.swift in Sources */,
 				E73C2C6489843CD0876B33C7 /* SMCConnection.swift in Sources */,
 				0D5257C515CD60051D8FDE91 /* SMCDataTypes.swift in Sources */,
 				10CEFDF9A8F7C5FF5872BF75 /* SMCKeys.swift in Sources */,
@@ -398,6 +441,7 @@
 				412A6D64228AF66BE90C5E1B /* SettingsView.swift in Sources */,
 				B0BE4EA15B9C9E2B510A55C1 /* TemperatureChartView.swift in Sources */,
 				54EBAC1E582B25821413406B /* TemperatureSensor.swift in Sources */,
+				1160E250B5E5F875859EE75C /* ThermalCorrelator.swift in Sources */,
 				A38CADFD2BEFC9F4EFE306AD /* TomsFansApp.swift in Sources */,
 				4743898FEC4B1278D4BF96BD /* XPCConstants.swift in Sources */,
 				DB8288A37CF554408F7515F3 /* XPCFanControlService.swift in Sources */,

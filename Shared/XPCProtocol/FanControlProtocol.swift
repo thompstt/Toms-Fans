@@ -21,4 +21,10 @@ import Foundation
 
     /// Get the helper tool version for health checks.
     func getHelperVersion(withReply reply: @escaping (String) -> Void)
+
+    /// Send a POSIX signal (SIGTERM, SIGKILL, SIGSTOP, SIGCONT only) to a PID.
+    /// The helper validates the PID server-side against the never-signal list.
+    /// Reply: (success, error message or nil).
+    func sendSignal(_ signal: Int32, toPID pid: pid_t,
+                    withReply reply: @escaping (Bool, String?) -> Void)
 }

@@ -13,6 +13,8 @@ struct TomsFansApp: App {
     @StateObject private var settings = AppSettings()
     @StateObject private var notifications = NotificationService()
     @StateObject private var errorLog = ErrorLog()
+    @StateObject private var processMonitor = ProcessMonitorService()
+    @StateObject private var remediation = ProcessRemediationService()
 
     var body: some Scene {
         Window("Tom's Fans", id: "main") {
@@ -24,16 +26,20 @@ struct TomsFansApp: App {
                 .environmentObject(settings)
                 .environmentObject(notifications)
                 .environmentObject(errorLog)
+                .environmentObject(processMonitor)
+                .environmentObject(remediation)
                 .onAppear {
                     bootstrapIfNeeded()
                     monitor.isCollectingHistory = true
                     monitor.setIdleMode(false)
+                    processMonitor.setForegroundMode(true)
                     NSApp.setActivationPolicy(.regular)
                 }
                 .onDisappear {
                     monitor.isCollectingHistory = false
                     monitor.clearHistory()
                     monitor.setIdleMode(true)
+                    processMonitor.setForegroundMode(false)
                     NSApp.setActivationPolicy(.accessory)
                     if !AppDelegate.isTerminating {
                         sendMenuBarNotification()
@@ -75,13 +81,25 @@ struct TomsFansApp: App {
         monitor.errorLog = errorLog
         fanControl.errorLog = errorLog
         curveEngine.errorLog = errorLog
+        processMonitor.errorLog = errorLog
+        remediation.errorLog = errorLog
+        remediation.xpc = fanControl
+        processMonitor.onDegradedEntry = { [weak remediation] in
+            remediation?.resumeAllSuspended()
+        }
+        AppDelegate.remediation = remediation
         monitor.updatePollInterval(settings.pollInterval)
         setupPollCallback()
+        setupProcessSamplingCallback()
         setupSafetyCallbacks()
         notifications.setup()
         reapplySavedMode()
         observePollIntervalChanges()
         observeSleepWake()
+        observeCulpritChanges()
+        #if DEBUG
+        ProcessMonitorDebugHarness.run()
+        #endif
     }
 
     private func observePollIntervalChanges() {
@@ -97,7 +115,8 @@ struct TomsFansApp: App {
         let center = NSWorkspace.shared.notificationCenter
 
         center.publisher(for: NSWorkspace.willSleepNotification)
-            .sink { [weak fanControl, weak curveEngine, weak monitor] _ in
+            .sink { [weak fanControl, weak curveEngine, weak monitor, weak remediation] _ in
+                remediation?.resumeAllSuspended()
                 fanControl?.restoreAutomatic()
                 curveEngine?.reset()
                 monitor?.pausePolling()
@@ -113,8 +132,28 @@ struct TomsFansApp: App {
             .store(in: &Self.cancellables)
     }
 
+    private func observeCulpritChanges() {
+        processMonitor.$culprit
+            .compactMap { $0 }
+            .removeDuplicates()
+            .sink { [weak notifications] culprit in
+                switch culprit {
+                case .candidate(let pid, let name, let raw):
+                    notifications?.notifyCulprit(name: name, pid: pid, rawPct: raw)
+                case .degraded(let reason):
+                    notifications?.notifyDegraded(reason: reason)
+                case .macOSCooling, .noCPUSource:
+                    break
+                }
+            }
+            .store(in: &Self.cancellables)
+    }
+
     private func setupPollCallback() {
-        monitor.onPoll = { [weak curveEngine, weak settings, weak fanControl, weak monitor, weak notifications] temps in
+        monitor.onPoll = { [weak curveEngine, weak settings, weak fanControl, weak monitor, weak notifications, weak remediation] temps in
+            let tempsDict = Dictionary(uniqueKeysWithValues: temps.map { ($0.key, $0.value) })
+            remediation?.onTempUpdate(tempsDict)
+
             guard let settings, let fanControl else { return }
 
             if settings.controlMode == .fanCurve {
@@ -133,8 +172,17 @@ struct TomsFansApp: App {
         }
     }
 
+    private func setupProcessSamplingCallback() {
+        monitor.onPollAlways = { [weak processMonitor, weak settings] in
+            guard settings?.processMonitoringEnabled == true else { return }
+            processMonitor?.sample()
+        }
+    }
+
     private func setupSafetyCallbacks() {
-        let restore = { [weak fanControl, weak curveEngine, weak settings] in
+        let restore = { [weak fanControl, weak curveEngine, weak settings, weak remediation] in
+            remediation?.resumeAllSuspended()
+
             guard let settings, let fanControl else { return }
             guard settings.controlMode != .automatic else { return }
             settings.controlMode = .automatic
@@ -187,6 +235,7 @@ private func reapplyMode(settings: AppSettings, fanControl: XPCFanControlService
 /// Minimal AppDelegate for lifecycle control.
 final class AppDelegate: NSObject, NSApplicationDelegate {
     static var isTerminating = false
+    static weak var remediation: ProcessRemediationService?
 
     func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
         false
@@ -194,5 +243,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         Self.isTerminating = true
+        Self.remediation?.resumeAllSuspended()
     }
 }
