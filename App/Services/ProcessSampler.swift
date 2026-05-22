@@ -105,10 +105,10 @@ enum ProcessSampler {
         )
         defer { curr = snapshot }
         guard let prev else { return nil }
-        let userΔ = Double(snapshot.user - prev.user)
-        let sysΔ  = Double(snapshot.system - prev.system)
-        let niceΔ = Double(snapshot.nice - prev.nice)
-        let idleΔ = Double(snapshot.idle - prev.idle)
+        let userΔ = Double(Int64(snapshot.user) - Int64(prev.user))
+        let sysΔ  = Double(Int64(snapshot.system) - Int64(prev.system))
+        let niceΔ = Double(Int64(snapshot.nice) - Int64(prev.nice))
+        let idleΔ = Double(Int64(snapshot.idle) - Int64(prev.idle))
         let totalΔ = userΔ + sysΔ + niceΔ + idleΔ
         guard totalΔ > 0 else { return nil }
         return ((userΔ + sysΔ + niceΔ) / totalΔ) * 100.0
