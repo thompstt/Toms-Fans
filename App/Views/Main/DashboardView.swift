@@ -351,6 +351,7 @@ struct DashboardView: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var errorLog: ErrorLog
     @EnvironmentObject var processMonitor: ProcessMonitorService
+    @EnvironmentObject var remediation: ProcessRemediationService
     @State private var chartSensorKeys: Set<String> = ["TCXC", "TG0P"]
     @State private var expandedCategories: Set<SensorCategory> = []
     @State private var manualSpeeds: [Int: Double] = [:]
@@ -448,6 +449,20 @@ struct DashboardView: View {
                 }
 
                 if settings.processMonitoringEnabled {
+                    if let culprit = processMonitor.culprit {
+                        CulpritCardView(
+                            culprit: culprit,
+                            displayMode: settings.cpuDisplayMode,
+                            remediationEnabled: settings.remediationEnabled,
+                            onQuit: { pid, name in remediation.terminate(pid: pid, name: name) },
+                            onForceQuit: { pid, name in remediation.forceQuit(pid: pid, name: name) },
+                            onThrottle: { pid, name in
+                                let temps = Dictionary(uniqueKeysWithValues: monitor.temperatures.map { ($0.key, $0.value) })
+                                remediation.throttle(pid: pid, name: name, currentTemps: temps)
+                            }
+                        )
+                    }
+
                     ProcessListView(
                         samples: processMonitor.samples,
                         hostCPUPercent: processMonitor.hostCPUPercent,
