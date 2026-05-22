@@ -84,6 +84,7 @@ struct TomsFansApp: App {
         processMonitor.errorLog = errorLog
         remediation.errorLog = errorLog
         remediation.xpc = fanControl
+        AppDelegate.remediation = remediation
         monitor.updatePollInterval(settings.pollInterval)
         setupPollCallback()
         setupProcessSamplingCallback()
@@ -110,7 +111,8 @@ struct TomsFansApp: App {
         let center = NSWorkspace.shared.notificationCenter
 
         center.publisher(for: NSWorkspace.willSleepNotification)
-            .sink { [weak fanControl, weak curveEngine, weak monitor] _ in
+            .sink { [weak fanControl, weak curveEngine, weak monitor, weak remediation] _ in
+                remediation?.resumeAllSuspended()
                 fanControl?.restoreAutomatic()
                 curveEngine?.reset()
                 monitor?.pausePolling()
@@ -127,7 +129,10 @@ struct TomsFansApp: App {
     }
 
     private func setupPollCallback() {
-        monitor.onPoll = { [weak curveEngine, weak settings, weak fanControl, weak monitor, weak notifications] temps in
+        monitor.onPoll = { [weak curveEngine, weak settings, weak fanControl, weak monitor, weak notifications, weak remediation] temps in
+            let tempsDict = Dictionary(uniqueKeysWithValues: temps.map { ($0.key, $0.value) })
+            remediation?.onTempUpdate(tempsDict)
+
             guard let settings, let fanControl else { return }
 
             if settings.controlMode == .fanCurve {
@@ -154,7 +159,9 @@ struct TomsFansApp: App {
     }
 
     private func setupSafetyCallbacks() {
-        let restore = { [weak fanControl, weak curveEngine, weak settings] in
+        let restore = { [weak fanControl, weak curveEngine, weak settings, weak remediation] in
+            remediation?.resumeAllSuspended()
+
             guard let settings, let fanControl else { return }
             guard settings.controlMode != .automatic else { return }
             settings.controlMode = .automatic
@@ -207,6 +214,7 @@ private func reapplyMode(settings: AppSettings, fanControl: XPCFanControlService
 /// Minimal AppDelegate for lifecycle control.
 final class AppDelegate: NSObject, NSApplicationDelegate {
     static var isTerminating = false
+    static weak var remediation: ProcessRemediationService?
 
     func applicationShouldTerminateAfterLastWindowClosed(_ app: NSApplication) -> Bool {
         false
@@ -214,5 +222,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         Self.isTerminating = true
+        Self.remediation?.resumeAllSuspended()
     }
 }
