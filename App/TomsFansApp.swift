@@ -30,12 +30,14 @@ struct TomsFansApp: App {
                     bootstrapIfNeeded()
                     monitor.isCollectingHistory = true
                     monitor.setIdleMode(false)
+                    processMonitor.setForegroundMode(true)
                     NSApp.setActivationPolicy(.regular)
                 }
                 .onDisappear {
                     monitor.isCollectingHistory = false
                     monitor.clearHistory()
                     monitor.setIdleMode(true)
+                    processMonitor.setForegroundMode(false)
                     NSApp.setActivationPolicy(.accessory)
                     if !AppDelegate.isTerminating {
                         sendMenuBarNotification()

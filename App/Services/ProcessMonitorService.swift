@@ -17,11 +17,19 @@ final class ProcessMonitorService: ObservableObject {
     /// Previous host_processor_info snapshot (for delta-based whole-CPU%).
     private var prevHostSnapshot: HostCPUSnapshot?
 
+    /// Per-PID rolling history. Only populated in foreground mode; pruned to 60s on each insert.
+    private var ringBuffer: [pid_t: [ProcessSample]] = [:]
+    private let ringBufferDuration: TimeInterval = 60
+
     private let workQueue = DispatchQueue(label: "com.tomsfans.processMonitor", qos: .userInitiated)
 
     func setForegroundMode(_ on: Bool) {
         workQueue.async { [weak self] in
-            self?.foregroundMode = on
+            guard let self else { return }
+            self.foregroundMode = on
+            if !on {
+                self.ringBuffer.removeAll()
+            }
         }
     }
 
@@ -70,6 +78,19 @@ final class ProcessMonitorService: ObservableObject {
             var newSnapshot: HostCPUSnapshot? = nil
             let hostPct = ProcessSampler.hostCPUPercent(prev: self.prevHostSnapshot, curr: &newSnapshot) ?? 0
             self.prevHostSnapshot = newSnapshot
+
+            if self.foregroundMode {
+                let cutoff = now.addingTimeInterval(-self.ringBufferDuration)
+                for s in newSamples {
+                    var hist = self.ringBuffer[s.pid] ?? []
+                    hist.append(s)
+                    if let firstKeep = hist.firstIndex(where: { $0.sampledAt >= cutoff }), firstKeep > 0 {
+                        hist.removeFirst(firstKeep)
+                    }
+                    self.ringBuffer[s.pid] = hist
+                }
+                self.ringBuffer = self.ringBuffer.filter { visibleSet.contains($0.key) }
+            }
 
             DispatchQueue.main.async {
                 self.samples = trimmed
