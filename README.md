@@ -88,6 +88,16 @@ Tom's Fans
 
 Built entirely with Apple frameworks: SwiftUI, IOKit, ServiceManagement, UserNotifications, and Combine.
 
+## Task Manager (experimental)
+
+Tom's Fans can identify processes that are sustaining heavy CPU load and likely causing heat. When detected, a banner appears with one-click actions to Quit, Force Quit, or temporarily Throttle the process.
+
+**Enable in Settings → Task Manager.** Process monitoring is on by default; remediation actions are opt-in.
+
+**Safety note:** when you Throttle a process, Tom's Fans suspends it (SIGSTOP) for up to 10 seconds, then automatically resumes it (SIGCONT). The app guarantees this auto-resume runs on every normal exit path — including sleep, helper disconnect, and quit.
+
+**Known limitation:** if Tom's Fans itself crashes (not a clean quit) while a process is throttled, that process will remain suspended. To unstick it manually: `kill -CONT <pid>`.
+
 ## Disclaimer
 
 **Use at your own risk.** Overriding system fan controls can cause hardware to overheat. This software is provided as-is with no warranty. The authors are not responsible for any hardware damage resulting from improper fan configuration.

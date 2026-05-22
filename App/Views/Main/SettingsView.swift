@@ -128,6 +128,18 @@ struct SettingsView: View {
                 Text("Temperature monitoring and fan control for MacBook Pro")
                     .foregroundStyle(.secondary)
             }
+
+            Section {
+                Toggle("Monitor processes", isOn: $settings.processMonitoringEnabled)
+                Toggle("Allow remediation (Quit / Force Quit / Throttle)", isOn: $settings.remediationEnabled)
+                    .disabled(!settings.processMonitoringEnabled)
+            } header: {
+                Text("Task Manager")
+            } footer: {
+                Text("Process monitoring identifies likely heat sources. Remediation lets you act on them with one click. Throttled processes are released within 10 seconds or sooner if temperatures drop.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
         }
         .formStyle(.grouped)
         .frame(minWidth: 500, minHeight: 400)
