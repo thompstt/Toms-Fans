@@ -1,5 +1,6 @@
 import Foundation
 import IOKit
+import Darwin
 
 /// Implementation of the FanControlProtocol that performs privileged SMC writes.
 /// Runs inside the helper tool under root.
@@ -7,6 +8,12 @@ final class FanControlServiceImpl: NSObject, FanControlProtocol {
     private let connection = SMCConnection()
     private var originalMinSpeeds: [Int: Double] = [:]
     private var originalModes: [Int: UInt8] = [:]
+
+    private static let neverSignalNames: Set<String> = [
+        "kernel_task", "launchd", "WindowServer", "loginwindow",
+        "logd", "mds", "mds_stores", "com.tomsfans.helper", "Tom's Fans"
+    ]
+    private static let allowedSignals: Set<Int32> = [SIGTERM, SIGKILL, SIGSTOP, SIGCONT]
 
     override init() {
         super.init()
@@ -62,6 +69,37 @@ final class FanControlServiceImpl: NSObject, FanControlProtocol {
 
     func getHelperVersion(withReply reply: @escaping (String) -> Void) {
         reply(XPCConstants.helperVersion)
+    }
+
+    func sendSignal(_ signal: Int32, toPID pid: pid_t,
+                    withReply reply: @escaping (Bool, String?) -> Void) {
+        guard Self.allowedSignals.contains(signal) else {
+            reply(false, "signal \(signal) not allowed")
+            return
+        }
+        guard pid > 1 else {
+            reply(false, "PID \(pid) is protected (kernel/launchd)")
+            return
+        }
+        if pid == getpid() {
+            reply(false, "refused to signal helper itself")
+            return
+        }
+        var nameBuf = [CChar](repeating: 0, count: 1024)
+        let written = proc_name(pid, &nameBuf, UInt32(nameBuf.count))
+        if written > 0 {
+            let name = String(cString: nameBuf)
+            if Self.neverSignalNames.contains(name) {
+                reply(false, "process \(name) is on the never-signal list")
+                return
+            }
+        }
+        let result = kill(pid, signal)
+        if result == 0 {
+            reply(true, nil)
+        } else {
+            reply(false, "kill(\(pid), \(signal)) failed: errno=\(errno)")
+        }
     }
 
     // MARK: - Private
