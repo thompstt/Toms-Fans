@@ -82,6 +82,9 @@ struct TomsFansApp: App {
         reapplySavedMode()
         observePollIntervalChanges()
         observeSleepWake()
+        #if DEBUG
+        ProcessMonitorDebugHarness.run()
+        #endif
     }
 
     private func observePollIntervalChanges() {
