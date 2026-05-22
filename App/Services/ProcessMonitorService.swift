@@ -1,5 +1,4 @@
 import Foundation
-import Combine
 
 final class ProcessMonitorService: ObservableObject {
     /// Latest tick's samples, sorted by cpuRawPct desc.
@@ -18,56 +17,64 @@ final class ProcessMonitorService: ObservableObject {
     /// Previous host_processor_info snapshot (for delta-based whole-CPU%).
     private var prevHostSnapshot: HostCPUSnapshot?
 
+    private let workQueue = DispatchQueue(label: "com.tomsfans.processMonitor", qos: .userInitiated)
+
     func setForegroundMode(_ on: Bool) {
-        foregroundMode = on
+        workQueue.async { [weak self] in
+            self?.foregroundMode = on
+        }
     }
 
     /// Called on every tick from monitor.onPollAlways.
     func sample() {
-        let now = Date()
-        let allPIDs = ProcessSampler.listAllPIDs()
+        workQueue.async { [weak self] in
+            guard let self else { return }
 
-        var newSamples: [ProcessSample] = []
-        newSamples.reserveCapacity(allPIDs.count)
+            let now = Date()
+            let allPIDs = ProcessSampler.listAllPIDs()
 
-        for pid in allPIDs {
-            guard let cpu = ProcessSampler.cpuTimeSeconds(for: pid) else { continue }
-            let (raw, normalized): (Double, Double)
-            if let prev = prevCPUSeconds[pid] {
-                (raw, normalized) = ProcessSampler.computeRate(
-                    prevCPUSeconds: prev.seconds,
-                    currCPUSeconds: cpu,
-                    prevWall: prev.at,
-                    currWall: now
-                )
-            } else {
-                (raw, normalized) = (0, 0)
+            var newSamples: [ProcessSample] = []
+            newSamples.reserveCapacity(allPIDs.count)
+
+            for pid in allPIDs {
+                guard let cpu = ProcessSampler.cpuTimeSeconds(for: pid) else { continue }
+                let (raw, normalized): (Double, Double)
+                if let prev = self.prevCPUSeconds[pid] {
+                    (raw, normalized) = ProcessSampler.computeRate(
+                        prevCPUSeconds: prev.seconds,
+                        currCPUSeconds: cpu,
+                        prevWall: prev.at,
+                        currWall: now
+                    )
+                } else {
+                    (raw, normalized) = (0, 0)
+                }
+                let name = ProcessSampler.name(for: pid)
+                let path = ProcessSampler.path(for: pid)
+                let rss = ProcessSampler.residentMemoryBytes(for: pid)
+                newSamples.append(ProcessSample(
+                    pid: pid, name: name, path: path,
+                    cpuTimeSeconds: cpu, cpuRawPct: raw, cpuNormalizedPct: normalized,
+                    rssBytes: rss, sampledAt: now
+                ))
+                self.prevCPUSeconds[pid] = (cpu, now)
             }
-            let name = ProcessSampler.name(for: pid)
-            let path = ProcessSampler.path(for: pid)
-            let rss = ProcessSampler.residentMemoryBytes(for: pid)
-            newSamples.append(ProcessSample(
-                pid: pid, name: name, path: path,
-                cpuTimeSeconds: cpu, cpuRawPct: raw, cpuNormalizedPct: normalized,
-                rssBytes: rss, sampledAt: now
-            ))
-            prevCPUSeconds[pid] = (cpu, now)
-        }
 
-        let visibleSet = Set(allPIDs)
-        prevCPUSeconds = prevCPUSeconds.filter { visibleSet.contains($0.key) }
+            let visibleSet = Set(allPIDs)
+            self.prevCPUSeconds = self.prevCPUSeconds.filter { visibleSet.contains($0.key) }
 
-        newSamples.sort { $0.cpuRawPct > $1.cpuRawPct }
+            newSamples.sort { $0.cpuRawPct > $1.cpuRawPct }
 
-        let trimmed = foregroundMode ? newSamples : Array(newSamples.prefix(backgroundTopN))
+            let trimmed = self.foregroundMode ? newSamples : Array(newSamples.prefix(self.backgroundTopN))
 
-        var newSnapshot: HostCPUSnapshot? = nil
-        let hostPct = ProcessSampler.hostCPUPercent(prev: prevHostSnapshot, curr: &newSnapshot) ?? 0
-        prevHostSnapshot = newSnapshot
+            var newSnapshot: HostCPUSnapshot? = nil
+            let hostPct = ProcessSampler.hostCPUPercent(prev: self.prevHostSnapshot, curr: &newSnapshot) ?? 0
+            self.prevHostSnapshot = newSnapshot
 
-        DispatchQueue.main.async {
-            self.samples = trimmed
-            self.hostCPUPercent = hostPct
+            DispatchQueue.main.async {
+                self.samples = trimmed
+                self.hostCPUPercent = hostPct
+            }
         }
     }
 }
