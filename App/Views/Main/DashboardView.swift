@@ -350,6 +350,7 @@ struct DashboardView: View {
     @EnvironmentObject var curveEngine: FanCurveEngine
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var errorLog: ErrorLog
+    @EnvironmentObject var processMonitor: ProcessMonitorService
     @State private var chartSensorKeys: Set<String> = ["TCXC", "TG0P"]
     @State private var expandedCategories: Set<SensorCategory> = []
     @State private var manualSpeeds: [Int: Double] = [:]
@@ -444,6 +445,17 @@ struct DashboardView: View {
                 // Fan Curve editor stays inline (needs settings binding + monitor.temperatures)
                 if settings.controlMode == .fanCurve, !settings.fanCurves.isEmpty {
                     fanCurveSection
+                }
+
+                if settings.processMonitoringEnabled {
+                    ProcessListView(
+                        samples: processMonitor.samples,
+                        hostCPUPercent: processMonitor.hostCPUPercent,
+                        displayMode: Binding(
+                            get: { settings.cpuDisplayMode },
+                            set: { settings.cpuDisplayMode = $0 }
+                        )
+                    )
                 }
 
             }
