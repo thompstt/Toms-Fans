@@ -21,6 +21,13 @@ final class ProcessMonitorService: ObservableObject {
     private let correlator = ThermalCorrelator()
     private var lastThermalState: ProcessInfo.ThermalState = .nominal
 
+    /// Consecutive ticks where sample data looked untrustworthy.
+    private var degradedStreak = 0
+    private var inDegradedMode = false
+    private static let degradedTickThreshold = 3
+    private static let pidCountFloor = 20
+    private static let cpuGapPctThreshold: Double = 50
+
     /// Per-PID rolling history. Only populated in foreground mode; pruned to 60s on each insert.
     private var ringBuffer: [pid_t: [ProcessSample]] = [:]
     private let ringBufferDuration: TimeInterval = 60
@@ -87,11 +94,32 @@ final class ProcessMonitorService: ObservableObject {
 
             newSamples.sort { $0.cpuRawPct > $1.cpuRawPct }
 
-            let trimmed = self.foregroundMode ? newSamples : Array(newSamples.prefix(self.backgroundTopN))
-
             var newSnapshot: HostCPUSnapshot? = nil
             let hostPct = ProcessSampler.hostCPUPercent(prev: self.prevHostSnapshot, curr: &newSnapshot) ?? 0
             self.prevHostSnapshot = newSnapshot
+
+            let visibleCPUSum = newSamples.reduce(0.0) { $0 + $1.cpuRawPct }
+            let hostCPURaw = hostPct * Double(ProcessSampler.logicalCoreCount)
+            let gap = max(0, hostCPURaw - visibleCPUSum)
+
+            let tooFewPIDs = allPIDs.count < Self.pidCountFloor
+            let widenedGap = gap > (Self.cpuGapPctThreshold * Double(ProcessSampler.logicalCoreCount))
+
+            let degradedThisTick = tooFewPIDs || widenedGap
+            let reasonString: String? = tooFewPIDs
+                ? "process enumeration returned only \(allPIDs.count) PIDs"
+                : (widenedGap ? "visible CPU sum below host total by \(Int(gap / Double(ProcessSampler.logicalCoreCount)))%" : nil)
+
+            if degradedThisTick {
+                self.degradedStreak += 1
+            } else {
+                self.degradedStreak = 0
+            }
+
+            let isDegradedSnapshot = self.degradedStreak >= Self.degradedTickThreshold
+            let degradedReasonSnapshot = reasonString
+
+            let trimmed = self.foregroundMode ? newSamples : Array(newSamples.prefix(self.backgroundTopN))
 
             if self.foregroundMode {
                 let cutoff = now.addingTimeInterval(-self.ringBufferDuration)
@@ -109,7 +137,23 @@ final class ProcessMonitorService: ObservableObject {
             DispatchQueue.main.async {
                 self.samples = trimmed
                 self.hostCPUPercent = hostPct
-                self.culprit = self.correlator.evaluate(samples: trimmed, thermalState: self.lastThermalState)
+
+                if isDegradedSnapshot {
+                    if !self.inDegradedMode {
+                        self.inDegradedMode = true
+                        self.errorLog?.logTransient(
+                            "Process monitoring degraded — \(degradedReasonSnapshot ?? "unknown reason")",
+                            source: .process
+                        )
+                    }
+                    self.correlator.reset()
+                    self.culprit = .degraded(reason: degradedReasonSnapshot ?? "untrusted sample")
+                } else {
+                    if self.inDegradedMode {
+                        self.inDegradedMode = false
+                    }
+                    self.culprit = self.correlator.evaluate(samples: trimmed, thermalState: self.lastThermalState)
+                }
             }
         }
     }
