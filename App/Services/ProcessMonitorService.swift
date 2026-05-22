@@ -5,6 +5,7 @@ final class ProcessMonitorService: ObservableObject {
     @Published private(set) var samples: [ProcessSample] = []
     /// Whole-machine CPU% from host_processor_info (0–100), for the §6 cross-check.
     @Published private(set) var hostCPUPercent: Double = 0
+    @Published private(set) var culprit: ProcessCulprit?
 
     var errorLog: ErrorLog?
 
@@ -17,11 +18,24 @@ final class ProcessMonitorService: ObservableObject {
     /// Previous host_processor_info snapshot (for delta-based whole-CPU%).
     private var prevHostSnapshot: HostCPUSnapshot?
 
+    private let correlator = ThermalCorrelator()
+    private var lastThermalState: ProcessInfo.ThermalState = .nominal
+
     /// Per-PID rolling history. Only populated in foreground mode; pruned to 60s on each insert.
     private var ringBuffer: [pid_t: [ProcessSample]] = [:]
     private let ringBufferDuration: TimeInterval = 60
 
     private let workQueue = DispatchQueue(label: "com.tomsfans.processMonitor", qos: .userInitiated)
+
+    init() {
+        lastThermalState = ProcessInfo.processInfo.thermalState
+        NotificationCenter.default.addObserver(
+            forName: ProcessInfo.thermalStateDidChangeNotification,
+            object: nil, queue: .main
+        ) { [weak self] _ in
+            self?.lastThermalState = ProcessInfo.processInfo.thermalState
+        }
+    }
 
     func setForegroundMode(_ on: Bool) {
         workQueue.async { [weak self] in
@@ -95,6 +109,7 @@ final class ProcessMonitorService: ObservableObject {
             DispatchQueue.main.async {
                 self.samples = trimmed
                 self.hostCPUPercent = hostPct
+                self.culprit = self.correlator.evaluate(samples: trimmed, thermalState: self.lastThermalState)
             }
         }
     }
