@@ -9,6 +9,9 @@ xcuserdata/
 build/
 .build/
 
+# Instruments traces (large binary profiling artifacts)
+*.trace/
+
 # macOS
 .DS_Store
 .AppleDouble
