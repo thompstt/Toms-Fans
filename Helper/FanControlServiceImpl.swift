@@ -24,7 +24,8 @@ final class FanControlServiceImpl: NSObject, FanControlProtocol {
     private var ceilingC: Double = 0
     /// When tripped, forced writes are rejected until the sensor drops below the
     /// hysteresis band. Prevents the app from immediately re-forcing fans low.
-    private var thermalLockout = false
+    /// Pure state machine — see Shared/Safety/ThermalLockoutState.swift.
+    private var lockout = ThermalLockoutState()
     private var safetyTimer: DispatchSourceTimer?
 
     /// When live fan enumeration fails (the exact case during an SMC fault), restore
@@ -82,7 +83,7 @@ final class FanControlServiceImpl: NSObject, FanControlProtocol {
     func setFanMinSpeed(fanIndex: Int, rpm: Int,
                         withReply reply: @escaping (Bool, String?) -> Void) {
         smcQueue.async {
-            guard !self.thermalLockout else {
+            guard !self.lockout.lockedOut else {
                 reply(false, "thermal protection active — forced control disabled until temperature drops")
                 return
             }
@@ -117,7 +118,7 @@ final class FanControlServiceImpl: NSObject, FanControlProtocol {
                     withReply reply: @escaping (Bool, String?) -> Void) {
         smcQueue.async {
             // Forcing is blocked during thermal lockout; reverting to auto is always allowed.
-            if mode != 0, self.thermalLockout {
+            if mode != 0, self.lockout.lockedOut {
                 reply(false, "thermal protection active — forced control disabled until temperature drops")
                 return
             }
@@ -140,12 +141,13 @@ final class FanControlServiceImpl: NSObject, FanControlProtocol {
         smcQueue.async {
             if sensorKey.utf8.count == 4, ceilingC > 0 {
                 self.guardSensor = FourCharCode(sensorKey)
-                self.ceilingC = ceilingC
+                // Never arm above Tjmax — a higher "ceiling" would be worse than Off.
+                self.ceilingC = min(ceilingC, ThermalCeiling.maxC)
             } else {
                 // Disable the guard and clear any standing lockout.
                 self.guardSensor = nil
                 self.ceilingC = 0
-                self.thermalLockout = false
+                self.lockout.disable()
             }
             reply(true, nil)
         }
@@ -271,17 +273,22 @@ final class FanControlServiceImpl: NSObject, FanControlProtocol {
 
     private func safetyTick() {
         dispatchPrecondition(condition: .onQueue(smcQueue))
-        guard !forcedFans.isEmpty, let sensor = guardSensor, ceilingC > 0 else { return }
+        guard let sensor = guardSensor, ceilingC > 0 else { return }
+        // Keep ticking while locked out even though the trip un-forced every fan —
+        // otherwise the clear path is unreachable and the lockout latches forever.
+        guard lockout.lockedOut || !forcedFans.isEmpty else { return }
         guard let temp = try? reader.readTemperature(key: sensor) else { return }
 
-        if !thermalLockout, temp >= ceilingC {
+        switch lockout.evaluate(fansForced: !forcedFans.isEmpty, temp: temp,
+                                ceilingC: ceilingC, hysteresisC: Self.ceilingHysteresisC) {
+        case .trip:
             NSLog("FanControlServiceImpl: thermal ceiling %.0fC reached (%.1fC) — reverting fans to auto",
                   ceilingC, temp)
-            thermalLockout = true
             _ = performRestore(panic: true)
-        } else if thermalLockout, temp <= ceilingC - Self.ceilingHysteresisC {
+        case .clear:
             NSLog("FanControlServiceImpl: thermal lockout cleared (%.1fC)", temp)
-            thermalLockout = false
+        case .none:
+            break
         }
     }
 
