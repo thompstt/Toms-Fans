@@ -9,11 +9,13 @@ final class XPCFanControlService: ObservableObject {
     var onDisconnect: (() -> Void)?
     private var xpcConnection: NSXPCConnection?
 
-    /// Absolute CPU thermal ceiling the helper enforces while fans are forced.
-    /// TCXC = Intel CPU package (PECI). TODO(#7): branch sensor for Apple Silicon;
-    /// TODO: make the ceiling user-configurable in Settings.
+    /// Guard sensor the helper watches while fans are forced.
+    /// TCXC = Intel CPU package (PECI). TODO(#7): branch sensor for Apple Silicon.
     private static let thermalGuardSensor = "TCXC"
-    private static let thermalGuardCeilingC: Double = 90
+
+    /// Thermal-guard config, mirrored from AppSettings (set at bootstrap and on change).
+    var thermalLockoutEnabled = true
+    var thermalCeilingC: Double = ThermalCeiling.defaultC
 
     /// Get a proxy to the helper's FanControlProtocol.
     /// Lazily creates the XPC connection on first access.
@@ -73,10 +75,9 @@ final class XPCFanControlService: ObservableObject {
 
     /// Convenience: set fan mode (0 = auto, 1 = forced).
     func setFanMode(fanIndex: Int, mode: UInt8) {
-        // Arm the helper's thermal failsafe whenever we take forced control.
+        // Arm (or, if disabled, clear) the helper's thermal failsafe when we take forced control.
         if mode == 1 {
-            proxy?.setThermalGuard(sensorKey: Self.thermalGuardSensor,
-                                   ceilingC: Self.thermalGuardCeilingC) { _, _ in }
+            updateThermalGuard()
         }
         proxy?.setFanMode(fanIndex: fanIndex, mode: mode) { [weak self] success, error in
             if !success {
@@ -87,6 +88,14 @@ final class XPCFanControlService: ObservableObject {
                 }
             }
         }
+    }
+
+    /// Push the current thermal-guard config to the helper. A ceiling of 0 disables
+    /// the guard (and clears any standing lockout) helper-side. Call when the user
+    /// changes the setting while fans are already forced.
+    func updateThermalGuard() {
+        let ceiling = thermalLockoutEnabled ? thermalCeilingC : 0
+        proxy?.setThermalGuard(sensorKey: Self.thermalGuardSensor, ceilingC: ceiling) { _, _ in }
     }
 
     /// Convenience: restore all fans to automatic control.
