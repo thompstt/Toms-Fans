@@ -30,12 +30,17 @@ struct ThermalLockoutState {
 
     enum Action: Equatable {
         case none
-        case trip    // crossed the ceiling: caller reverts fans to auto
+        case trip    // reached or crossed the ceiling: caller reverts fans to auto
         case clear   // dropped below the hysteresis band: lockout lifted
     }
 
-    /// Evaluate one safety tick. Caller guarantees the guard is armed (`ceilingC > 0`)
-    /// and `temp` is a valid reading.
+    /// Evaluate one safety tick.
+    ///
+    /// Preconditions (caller-guaranteed): the guard is armed (`ceilingC > 0`),
+    /// `hysteresisC > 0`, and `temp` is a valid reading. A non-positive hysteresis
+    /// would collapse the hold band and let the lockout flap trip↔clear while the
+    /// temperature is pinned at the ceiling. The sole caller passes a fixed positive
+    /// hysteresis constant, so this is a documented contract rather than a runtime guard.
     mutating func evaluate(fansForced: Bool, temp: Double,
                            ceilingC: Double, hysteresisC: Double) -> Action {
         guard lockedOut || fansForced else { return .none }

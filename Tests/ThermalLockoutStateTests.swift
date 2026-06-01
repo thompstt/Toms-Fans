@@ -45,6 +45,21 @@ final class ThermalLockoutStateTests: XCTestCase {
         XCTAssertFalse(s.lockedOut)
     }
 
+    func testReTripAfterClear() {
+        var s = ThermalLockoutState()
+        _ = s.evaluate(fansForced: true, temp: 97, ceilingC: ceiling, hysteresisC: hysteresis)
+        XCTAssertEqual(s.evaluate(fansForced: false, temp: 92, ceilingC: ceiling, hysteresisC: hysteresis), .clear)
+        // Heats back up while forced again -> trips a second time (machine is reusable).
+        XCTAssertEqual(s.evaluate(fansForced: true, temp: 97, ceilingC: ceiling, hysteresisC: hysteresis), .trip)
+        XCTAssertTrue(s.lockedOut)
+    }
+
+    func testNoTripJustBelowCeiling() {
+        var s = ThermalLockoutState()
+        XCTAssertEqual(s.evaluate(fansForced: true, temp: 96.999, ceilingC: ceiling, hysteresisC: hysteresis), .none)
+        XCTAssertFalse(s.lockedOut)
+    }
+
     func testClampBounds() {
         XCTAssertEqual(ThermalCeiling.clamp(40), 50)
         XCTAssertEqual(ThermalCeiling.clamp(120), 100)
