@@ -97,6 +97,19 @@ final class AppSettings: ObservableObject {
     @Published var cpuDisplayMode: CPUDisplayMode {
         didSet { UserDefaults.standard.set(cpuDisplayMode.rawValue, forKey: "cpuDisplayMode") }
     }
+    @Published var thermalLockoutEnabled: Bool {
+        didSet { UserDefaults.standard.set(thermalLockoutEnabled, forKey: "thermalLockoutEnabled") }
+    }
+    @Published var thermalCeilingC: Double {
+        didSet {
+            let clamped = ThermalCeiling.clamp(thermalCeilingC)
+            if thermalCeilingC != clamped {
+                thermalCeilingC = clamped   // one-level recursion; then equal -> persists
+            } else {
+                UserDefaults.standard.set(thermalCeilingC, forKey: "thermalCeilingC")
+            }
+        }
+    }
 
     enum TemperatureUnit: String, CaseIterable, Identifiable {
         case celsius, fahrenheit
@@ -137,6 +150,9 @@ final class AppSettings: ObservableObject {
         self.remediationEnabled = (UserDefaults.standard.object(forKey: "remediationEnabled") as? Bool) ?? false
         self.cpuDisplayMode = CPUDisplayMode(rawValue:
             UserDefaults.standard.string(forKey: "cpuDisplayMode") ?? "normalized") ?? .normalized100
+        self.thermalLockoutEnabled = (UserDefaults.standard.object(forKey: "thermalLockoutEnabled") as? Bool) ?? true
+        let storedCeiling = UserDefaults.standard.double(forKey: "thermalCeilingC")
+        self.thermalCeilingC = storedCeiling > 0 ? ThermalCeiling.clamp(storedCeiling) : ThermalCeiling.defaultC
         refreshLaunchAtLoginState()
 
         // Persist default fan curves if they were just created (init doesn't trigger didSet)
