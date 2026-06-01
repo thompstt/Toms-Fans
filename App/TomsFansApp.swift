@@ -80,6 +80,8 @@ struct TomsFansApp: App {
         Self.hasBootstrapped = true
         monitor.errorLog = errorLog
         fanControl.errorLog = errorLog
+        fanControl.thermalLockoutEnabled = settings.thermalLockoutEnabled
+        fanControl.thermalCeilingC = settings.thermalCeilingC
         curveEngine.errorLog = errorLog
         processMonitor.errorLog = errorLog
         remediation.errorLog = errorLog
@@ -95,6 +97,7 @@ struct TomsFansApp: App {
         notifications.setup()
         reapplySavedMode()
         observePollIntervalChanges()
+        observeThermalSettings()
         observeSleepWake()
         observeCulpritChanges()
         #if DEBUG
@@ -107,6 +110,22 @@ struct TomsFansApp: App {
             .dropFirst()
             .sink { [weak monitor] interval in
                 monitor?.updatePollInterval(interval)
+            }
+            .store(in: &Self.cancellables)
+    }
+
+    private func observeThermalSettings() {
+        settings.$thermalLockoutEnabled
+            .combineLatest(settings.$thermalCeilingC)
+            .dropFirst()
+            .sink { [weak fanControl, weak settings] enabled, ceiling in
+                guard let fanControl, let settings else { return }
+                fanControl.thermalLockoutEnabled = enabled
+                fanControl.thermalCeilingC = ceiling
+                // Re-arm immediately only if we're currently driving the fans.
+                if settings.controlMode != .automatic {
+                    fanControl.updateThermalGuard()
+                }
             }
             .store(in: &Self.cancellables)
     }
