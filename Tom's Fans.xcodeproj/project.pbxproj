@@ -382,7 +382,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Copy helper binary into app bundle for SMAppService.daemon\nHELPER_SRC=\"${BUILT_PRODUCTS_DIR}/com.tomsfans.helper\"\nHELPER_DST=\"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Contents/Library/LaunchDaemons\"\nPLIST_SRC=\"${SRCROOT}/Helper/launchd.plist\"\n\nmkdir -p \"${HELPER_DST}\"\ncp -f \"${PLIST_SRC}\" \"${HELPER_DST}/com.tomsfans.helper.plist\"\n";
+			shellScript = "# Copy helper launchd plist into app bundle for SMAppService.daemon\nHELPER_DST=\"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Contents/Library/LaunchDaemons\"\nPLIST_SRC=\"${SRCROOT}/Helper/launchd.plist\"\n\nmkdir -p \"${HELPER_DST}\"\ncp -f \"${PLIST_SRC}\" \"${HELPER_DST}/com.tomsfans.helper.plist\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
