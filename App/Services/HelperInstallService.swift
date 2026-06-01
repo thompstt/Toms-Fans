@@ -56,4 +56,8 @@ final class HelperInstallService: ObservableObject {
     var isHelperRunning: Bool {
         status == .enabled
     }
+
+    var needsApproval: Bool {
+        status == .requiresApproval
+    }
 }

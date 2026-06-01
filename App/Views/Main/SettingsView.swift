@@ -1,4 +1,5 @@
 import SwiftUI
+import AppKit
 
 struct SettingsView: View {
     @EnvironmentObject var settings: AppSettings
@@ -39,6 +40,13 @@ struct SettingsView: View {
                     Text("The helper tool runs with elevated privileges to control fan speeds. You'll be asked to approve it in System Settings > Login Items & Extensions.")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                    if helperInstall.needsApproval {
+                        Button("Open Login Items Settings") {
+                            if let url = URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension") {
+                                NSWorkspace.shared.open(url)
+                            }
+                        }
+                    }
                 } else {
                     Button("Uninstall Helper") {
                         helperInstall.unregister()
