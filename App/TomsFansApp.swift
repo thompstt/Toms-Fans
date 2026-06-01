@@ -67,6 +67,7 @@ struct TomsFansApp: App {
             SettingsView()
                 .environmentObject(settings)
                 .environmentObject(helperInstall)
+                .environmentObject(fanControl)
                 .environmentObject(notifications)
                 .environmentObject(errorLog)
         }
@@ -95,6 +96,9 @@ struct TomsFansApp: App {
         setupProcessSamplingCallback()
         setupSafetyCallbacks()
         notifications.setup()
+        // Establish the helper connection now so the version check runs at launch,
+        // even when the saved mode is Automatic and no fan command is issued.
+        fanControl.connect()
         reapplySavedMode()
         observePollIntervalChanges()
         observeThermalSettings()
