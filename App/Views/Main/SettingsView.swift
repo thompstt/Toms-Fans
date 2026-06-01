@@ -86,6 +86,32 @@ struct SettingsView: View {
                 }
             }
 
+            Section {
+                Toggle("Revert to automatic if CPU gets too hot", isOn: $settings.thermalLockoutEnabled)
+
+                HStack {
+                    Stepper(value: $settings.thermalCeilingC,
+                            in: ThermalCeiling.minC...ThermalCeiling.maxC,
+                            step: 1) {
+                        Text("Ceiling: \(Int(settings.thermalCeilingC))°C")
+                            .monospacedDigit()
+                    }
+                    .disabled(!settings.thermalLockoutEnabled)
+                }
+            } header: {
+                Text("Thermal Safety")
+            } footer: {
+                if settings.thermalLockoutEnabled {
+                    Text("While a fan curve or manual speed is active, the helper reverts all fans to automatic if the CPU package reaches this temperature, then resumes once it cools. 90°C is normal under load on this hardware; the default 97°C leaves margin below the CPU's ~100°C throttle.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Forced and curve fan modes will have NO software thermal protection — only the CPU's built-in ~100°C throttle, which does not protect the GPU, VRMs, or battery. Crash protection (revert to automatic when the app exits) still applies.")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+            }
+
             Section("Error Log") {
                 if errorLog.entries.isEmpty {
                     Text("No errors recorded this session.")
