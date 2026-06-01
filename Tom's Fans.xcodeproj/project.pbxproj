@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 63;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -74,7 +74,7 @@
 		0C0A3C67D3958D1A064CCF21 /* ProcessMonitorDebugHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMonitorDebugHarness.swift; sourceTree = "<group>"; };
 		0DA401AF3AE2023682278131 /* ErrorLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorLog.swift; sourceTree = "<group>"; };
 		1350EE35B143206D78C28EA3 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
-		1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */ = {isa = PBXFileReference; includeInIndex = 0; path = com.tomsfans.helper; sourceTree = BUILT_PRODUCTS_DIR; };
+		1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = com.tomsfans.helper; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A5B14DFC218427E225920E0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		2D52E5A1B7F1A476FE09B0FB /* XPCFanControlService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCFanControlService.swift; sourceTree = "<group>"; };
 		322115D488328C9C9468E93E /* ProcessCulprit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessCulprit.swift; sourceTree = "<group>"; };
@@ -344,7 +344,6 @@
 			);
 			mainGroup = CEE092C3F2129E5E66227D90;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -383,7 +382,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Copy helper binary into app bundle for SMAppService.daemon\nHELPER_SRC=\"${BUILT_PRODUCTS_DIR}/com.tomsfans.helper\"\nHELPER_DST=\"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Contents/Library/LaunchDaemons\"\nPLIST_SRC=\"${SRCROOT}/Helper/launchd.plist\"\n\nmkdir -p \"${HELPER_DST}\"\ncp -f \"${HELPER_SRC}\" \"${HELPER_DST}/com.tomsfans.helper\"\ncp -f \"${PLIST_SRC}\" \"${HELPER_DST}/com.tomsfans.helper.plist\"\n";
+			shellScript = "# Copy helper binary into app bundle for SMAppService.daemon\nHELPER_SRC=\"${BUILT_PRODUCTS_DIR}/com.tomsfans.helper\"\nHELPER_DST=\"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Contents/Library/LaunchDaemons\"\nPLIST_SRC=\"${SRCROOT}/Helper/launchd.plist\"\n\nmkdir -p \"${HELPER_DST}\"\ncp -f \"${PLIST_SRC}\" \"${HELPER_DST}/com.tomsfans.helper.plist\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -516,6 +515,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -670,7 +670,7 @@
 				0D361485FD2C43FC01A41989 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		3AE31D3B5489EB54D17C421B /* Build configuration list for PBXNativeTarget "Tom's Fans" */ = {
 			isa = XCConfigurationList;
@@ -679,7 +679,7 @@
 				8E61FD356554875605796472 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 		61F45E9D706F367B97DCE8AF /* Build configuration list for PBXNativeTarget "com.tomsfans.helper" */ = {
 			isa = XCConfigurationList;
@@ -688,7 +688,7 @@
 				FEDD288245B2B5FD5DF3FE43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
