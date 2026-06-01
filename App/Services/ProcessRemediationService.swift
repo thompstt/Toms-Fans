@@ -15,7 +15,10 @@ final class ProcessRemediationService: ObservableObject {
         var resumeWorkItem: DispatchWorkItem?
     }
     private var suspendedPIDs: [pid_t: Suspension] = [:]
-    private let maxSuspensionSeconds: TimeInterval = 10
+    /// Duty-cycle level handed to the helper: fraction of time the process is suspended.
+    private static let throttleLevel: Double = 0.5
+    /// Backstop: stop throttling after this long even if the temp-drop trigger never fires.
+    private let maxThrottleSeconds: TimeInterval = 30
     private let earlyResumeTempDropC: Double = 5
 
     /// SIGTERM, then SIGKILL escalation after 3 s if still alive.
@@ -50,8 +53,10 @@ final class ProcessRemediationService: ObservableObject {
         xpc?.sendSignal(SIGKILL, toPID: pid) { _, _ in }
     }
 
-    /// SIGSTOP the PID. Auto-resumes after 10s OR when any monitored temperature
-    /// drops by 5°C from the suspend-time snapshot (whichever comes first).
+    /// Begin duty-cycle throttling: the helper alternately suspends/resumes the PID to
+    /// cap its CPU. Stops when a monitored temperature drops ≥5°C from the snapshot, or
+    /// after a bounded backstop duration — whichever comes first. The helper guarantees
+    /// the process is resumed on stop, disconnect, or crash.
     func throttle(pid: pid_t, name: String, currentTemps: [String: Double]) {
         guard !ThermalCorrelator.neverRankNames.contains(name) else {
             errorLog?.logTransient("Refused to signal protected process \(name)", source: .process)
@@ -63,33 +68,31 @@ final class ProcessRemediationService: ObservableObject {
         }
         if suspendedPIDs[pid] != nil { return }
 
-        xpc.sendSignal(SIGSTOP, toPID: pid) { [weak self] success, _ in
-            guard success, let self else { return }
+        // The helper owns the SIGSTOP/SIGCONT duty cycle (root for both, crash-safe).
+        xpc.startThrottle(pid: pid, level: Self.throttleLevel)
 
-            let resumeWork = DispatchWorkItem { [weak self] in
-                DispatchQueue.main.async {
-                    self?.resume(pid: pid)
-                }
-            }
-            self.queue.asyncAfter(deadline: .now() + self.maxSuspensionSeconds, execute: resumeWork)
-
-            let suspension = Suspension(
-                pid: pid, name: name,
-                suspendedAt: Date(),
-                tempsAtSuspend: currentTemps,
-                resumeWorkItem: resumeWork
-            )
-            self.suspendedPIDs[pid] = suspension
+        // Backstop so nothing stays throttled indefinitely if the temp-drop never fires.
+        let resumeWork = DispatchWorkItem { [weak self] in
+            DispatchQueue.main.async { self?.resume(pid: pid) }
         }
+        queue.asyncAfter(deadline: .now() + maxThrottleSeconds, execute: resumeWork)
+
+        suspendedPIDs[pid] = Suspension(
+            pid: pid, name: name,
+            suspendedAt: Date(),
+            tempsAtSuspend: currentTemps,
+            resumeWorkItem: resumeWork
+        )
     }
 
-    /// Single mutation point: removes from suspendedPIDs, cancels the deadline, sends SIGCONT.
-    /// Always all three. Idempotent — safe to call multiple times for the same PID.
-    /// SIGCONT goes directly via kill() (no XPC dependency); same-user processes don't need root.
+    /// Single mutation point: removes from the registry, cancels the backstop timer, and
+    /// tells the helper to stop throttling (which guarantees SIGCONT as root for any
+    /// process — fixing the old EPERM gap where app-side SIGCONT failed for root-owned PIDs).
+    /// Idempotent — safe to call multiple times for the same PID.
     private func resume(pid: pid_t) {
         guard let suspension = suspendedPIDs.removeValue(forKey: pid) else { return }
         suspension.resumeWorkItem?.cancel()
-        _ = kill(pid, SIGCONT)
+        xpc?.stopThrottle(pid: pid)
     }
 
     /// Per-tick check: resume any suspended PID whose monitored temperature

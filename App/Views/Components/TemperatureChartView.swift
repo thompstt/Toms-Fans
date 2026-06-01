@@ -1,19 +1,19 @@
 import SwiftUI
 
+private let chartPalette: [Color] = [.blue, .orange, .green, .red, .purple, .cyan, .pink, .yellow]
+private let chartTimeFormatter: DateFormatter = {
+    let f = DateFormatter()
+    f.dateFormat = "m:ss"
+    return f
+}()
+
 struct TemperatureChartView: View {
     let sensorKeys: [String]
     let history: [String: [TemperatureReading]]
     let sensorNames: [String: String]
     let range: TemperatureHistoryRange
 
-    private static let palette: [Color] = [.blue, .orange, .green, .red, .purple, .cyan, .pink, .yellow]
-    private static let timeFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.dateFormat = "m:ss"
-        return f
-    }()
     private let inset = EdgeInsets(top: 12, leading: 40, bottom: 40, trailing: 12)
-    @State private var hoverLocation: CGPoint?
 
     var body: some View {
         GeometryReader { geo in
@@ -29,22 +29,20 @@ struct TemperatureChartView: View {
                 maxTime: window.upperBound
             )
 
-            Canvas { ctx, _ in
-                drawHorizontalGrid(ctx: ctx, plot: plot, stats: stats)
-                drawXAxis(ctx: ctx, plot: plot, stats: stats)
-                drawLines(ctx: ctx, plot: plot, stats: stats)
-                if let loc = hoverLocation {
-                    drawCrosshair(ctx: ctx, plot: plot, stats: stats, hoverX: loc.x)
+            ZStack {
+                Canvas { ctx, _ in
+                    drawHorizontalGrid(ctx: ctx, plot: plot, stats: stats)
+                    drawXAxis(ctx: ctx, plot: plot, stats: stats)
+                    drawLines(ctx: ctx, plot: plot, stats: stats)
                 }
-            }
-            .drawingGroup()
-            .onContinuousHover { phase in
-                switch phase {
-                case .active(let location):
-                    hoverLocation = location
-                case .ended:
-                    hoverLocation = nil
-                }
+                .drawingGroup()
+
+                ChartHoverOverlay(
+                    plot: plot,
+                    stats: stats,
+                    sensorKeys: sensorKeys,
+                    history: history
+                )
             }
 
             // Legend below chart
@@ -55,7 +53,7 @@ struct TemperatureChartView: View {
 
     // MARK: - Data Stats
 
-    private struct ChartStats {
+    fileprivate struct ChartStats {
         let minTemp: Double
         let maxTemp: Double
         let minTime: Date
@@ -161,7 +159,7 @@ struct TemperatureChartView: View {
             gridLine.addLine(to: CGPoint(x: px, y: plot.maxY))
             ctx.stroke(gridLine, with: .color(.secondary.opacity(0.08)), lineWidth: 0.5)
 
-            let label = Text(Self.timeFormatter.string(from: tick)).font(.system(size: 9)).foregroundColor(.secondary)
+            let label = Text(chartTimeFormatter.string(from: tick)).font(.system(size: 9)).foregroundColor(.secondary)
             ctx.draw(ctx.resolve(label), at: CGPoint(x: px, y: plot.maxY + 10), anchor: .center)
 
             tick = tick.addingTimeInterval(tickStride)
@@ -173,7 +171,7 @@ struct TemperatureChartView: View {
     private func drawLines(ctx: GraphicsContext, plot: CGRect, stats: ChartStats) {
         for (i, key) in sensorKeys.enumerated() {
             guard let readings = history[key], readings.count >= 2 else { continue }
-            let color = Self.palette[i % Self.palette.count]
+            let color = chartPalette[i % chartPalette.count]
 
             var path = Path()
             for (j, r) in readings.enumerated() {
@@ -188,7 +186,95 @@ struct TemperatureChartView: View {
         }
     }
 
-    // MARK: - Crosshair
+    // MARK: - Legend
+
+    private var legendView: some View {
+        HStack(spacing: 12) {
+            ForEach(Array(sensorKeys.enumerated()), id: \.element) { i, key in
+                HStack(spacing: 4) {
+                    Circle()
+                        .fill(chartPalette[i % chartPalette.count])
+                        .frame(width: 8, height: 8)
+                    Text(sensorNames[key] ?? key)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+}
+
+/// Owns the hover state so that hover updates only invalidate this overlay,
+/// not the parent chart's expensive stats/line computation.
+private struct ChartHoverOverlay: View {
+    let plot: CGRect
+    let stats: TemperatureChartView.ChartStats
+    let sensorKeys: [String]
+    let history: [String: [TemperatureReading]]
+
+    @State private var hoverLocation: CGPoint?
+
+    var body: some View {
+        Canvas { ctx, _ in
+            if let loc = hoverLocation {
+                drawCrosshair(ctx: ctx, hoverX: loc.x)
+            }
+        }
+        .drawingGroup()
+        .onContinuousHover { phase in
+            switch phase {
+            case .active(let location):
+                // Skip sub-pixel updates — during a scroll, onContinuousHover
+                // fires per frame even when the cursor itself hasn't moved.
+                if let prev = hoverLocation,
+                   abs(prev.x - location.x) < 2,
+                   abs(prev.y - location.y) < 2 {
+                    return
+                }
+                hoverLocation = location
+            case .ended:
+                hoverLocation = nil
+            }
+        }
+    }
+
+    private func drawCrosshair(ctx: GraphicsContext, hoverX: CGFloat) {
+        guard hoverX >= plot.minX, hoverX <= plot.maxX else { return }
+        let normX = (hoverX - plot.minX) / plot.width
+        let hoverDate = stats.dateFromNormalized(normX)
+
+        var line = Path()
+        line.move(to: CGPoint(x: hoverX, y: plot.minY))
+        line.addLine(to: CGPoint(x: hoverX, y: plot.maxY))
+        ctx.stroke(line, with: .color(.secondary.opacity(0.4)),
+                   style: StrokeStyle(lineWidth: 0.5, dash: [4, 3]))
+
+        let timeText = Text(chartTimeFormatter.string(from: hoverDate))
+            .font(.system(size: 9, weight: .medium))
+            .foregroundColor(.primary)
+        ctx.draw(ctx.resolve(timeText),
+                 at: CGPoint(x: hoverX, y: plot.maxY + 10), anchor: .center)
+
+        let labelOnLeft = hoverX > plot.midX
+        for (i, key) in sensorKeys.enumerated() {
+            guard let readings = history[key],
+                  let value = interpolatedValue(in: readings, at: hoverDate) else { continue }
+            let color = chartPalette[i % chartPalette.count]
+            let py = plot.maxY - stats.yNormalized(value) * plot.height
+
+            let dot = Path(ellipseIn: CGRect(x: hoverX - 3.5, y: py - 3.5, width: 7, height: 7))
+            ctx.fill(dot, with: .color(color))
+            ctx.stroke(dot, with: .color(.white.opacity(0.8)), lineWidth: 1.5)
+
+            let label = Text(String(format: "%.1f\u{00B0}", value))
+                .font(.system(size: 9, weight: .medium))
+                .foregroundColor(color)
+            let lx = labelOnLeft ? hoverX - 8 : hoverX + 8
+            ctx.draw(ctx.resolve(label),
+                     at: CGPoint(x: lx, y: py),
+                     anchor: labelOnLeft ? .trailing : .leading)
+        }
+    }
 
     private func interpolatedValue(in readings: [TemperatureReading], at date: Date) -> Double? {
         guard readings.count >= 2 else { return readings.first?.value }
@@ -205,65 +291,5 @@ struct TemperatureChartView: View {
         guard span > 0 else { return a.value }
         let t = date.timeIntervalSince(a.date) / span
         return a.value + t * (b.value - a.value)
-    }
-
-    private func drawCrosshair(ctx: GraphicsContext, plot: CGRect, stats: ChartStats, hoverX: CGFloat) {
-        guard hoverX >= plot.minX, hoverX <= plot.maxX else { return }
-        let normX = (hoverX - plot.minX) / plot.width
-        let hoverDate = stats.dateFromNormalized(normX)
-
-        // Vertical rule
-        var line = Path()
-        line.move(to: CGPoint(x: hoverX, y: plot.minY))
-        line.addLine(to: CGPoint(x: hoverX, y: plot.maxY))
-        ctx.stroke(line, with: .color(.secondary.opacity(0.4)),
-                   style: StrokeStyle(lineWidth: 0.5, dash: [4, 3]))
-
-        // Time label
-        let timeText = Text(Self.timeFormatter.string(from: hoverDate))
-            .font(.system(size: 9, weight: .medium))
-            .foregroundColor(.primary)
-        ctx.draw(ctx.resolve(timeText),
-                 at: CGPoint(x: hoverX, y: plot.maxY + 10), anchor: .center)
-
-        // Per-sensor dots and value labels
-        let labelOnLeft = hoverX > plot.midX
-        for (i, key) in sensorKeys.enumerated() {
-            guard let readings = history[key],
-                  let value = interpolatedValue(in: readings, at: hoverDate) else { continue }
-            let color = Self.palette[i % Self.palette.count]
-            let py = plot.maxY - stats.yNormalized(value) * plot.height
-
-            // Dot on the line
-            let dot = Path(ellipseIn: CGRect(x: hoverX - 3.5, y: py - 3.5, width: 7, height: 7))
-            ctx.fill(dot, with: .color(color))
-            ctx.stroke(dot, with: .color(.white.opacity(0.8)), lineWidth: 1.5)
-
-            // Value label
-            let label = Text(String(format: "%.1f\u{00B0}", value))
-                .font(.system(size: 9, weight: .medium))
-                .foregroundColor(color)
-            let lx = labelOnLeft ? hoverX - 8 : hoverX + 8
-            ctx.draw(ctx.resolve(label),
-                     at: CGPoint(x: lx, y: py),
-                     anchor: labelOnLeft ? .trailing : .leading)
-        }
-    }
-
-    // MARK: - Legend
-
-    private var legendView: some View {
-        HStack(spacing: 12) {
-            ForEach(Array(sensorKeys.enumerated()), id: \.element) { i, key in
-                HStack(spacing: 4) {
-                    Circle()
-                        .fill(Self.palette[i % Self.palette.count])
-                        .frame(width: 8, height: 8)
-                    Text(sensorNames[key] ?? key)
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
     }
 }

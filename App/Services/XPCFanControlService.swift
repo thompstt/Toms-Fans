@@ -9,6 +9,12 @@ final class XPCFanControlService: ObservableObject {
     var onDisconnect: (() -> Void)?
     private var xpcConnection: NSXPCConnection?
 
+    /// Absolute CPU thermal ceiling the helper enforces while fans are forced.
+    /// TCXC = Intel CPU package (PECI). TODO(#7): branch sensor for Apple Silicon;
+    /// TODO: make the ceiling user-configurable in Settings.
+    private static let thermalGuardSensor = "TCXC"
+    private static let thermalGuardCeilingC: Double = 90
+
     /// Get a proxy to the helper's FanControlProtocol.
     /// Lazily creates the XPC connection on first access.
     var proxy: FanControlProtocol? {
@@ -67,6 +73,11 @@ final class XPCFanControlService: ObservableObject {
 
     /// Convenience: set fan mode (0 = auto, 1 = forced).
     func setFanMode(fanIndex: Int, mode: UInt8) {
+        // Arm the helper's thermal failsafe whenever we take forced control.
+        if mode == 1 {
+            proxy?.setThermalGuard(sensorKey: Self.thermalGuardSensor,
+                                   ceilingC: Self.thermalGuardCeilingC) { _, _ in }
+        }
         proxy?.setFanMode(fanIndex: fanIndex, mode: mode) { [weak self] success, error in
             if !success {
                 let msg = error ?? "Failed to set fan \(fanIndex) mode"
@@ -80,6 +91,8 @@ final class XPCFanControlService: ObservableObject {
 
     /// Convenience: restore all fans to automatic control.
     func restoreAutomatic() {
+        // Disarm the thermal failsafe — we're handing control back to the OS.
+        proxy?.setThermalGuard(sensorKey: "", ceilingC: 0) { _, _ in }
         proxy?.restoreAutomaticControl { [weak self] success, error in
             if !success {
                 let msg = error ?? "Failed to restore automatic fan control"
@@ -89,6 +102,20 @@ final class XPCFanControlService: ObservableObject {
                 }
             }
         }
+    }
+
+    /// Begin helper-owned duty-cycle throttling of a PID (level = fraction suspended).
+    func startThrottle(pid: pid_t, level: Double) {
+        proxy?.startThrottle(pid: pid, level: level) { [weak self] success, error in
+            if !success, let error {
+                DispatchQueue.main.async { self?.errorLog?.logTransient(error, source: .process) }
+            }
+        }
+    }
+
+    /// Stop throttling a PID (the helper guarantees it is resumed).
+    func stopThrottle(pid: pid_t) {
+        proxy?.stopThrottle(pid: pid) { _, _ in }
     }
 
     /// Send a POSIX signal to a PID via the helper.

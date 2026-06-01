@@ -18,6 +18,10 @@ final class ProcessMonitorService: ObservableObject {
 
     /// Previous tick's per-PID cumulative CPU time + wall timestamp.
     private var prevCPUSeconds: [pid_t: (seconds: Double, at: Date)] = [:]
+    /// Cached name/path per PID — resolved once and reused for the lifetime of the PID.
+    /// proc_pidpath in particular allocates a 4KB buffer per call; resolving every tick
+    /// across ~700 PIDs is the dominant cost of this service.
+    private var pidInfo: [pid_t: (name: String, path: String)] = [:]
     /// Previous host_processor_info snapshot (for delta-based whole-CPU%).
     private var prevHostSnapshot: HostCPUSnapshot?
 
@@ -69,31 +73,36 @@ final class ProcessMonitorService: ObservableObject {
             newSamples.reserveCapacity(allPIDs.count)
 
             for pid in allPIDs {
-                guard let cpu = ProcessSampler.cpuTimeSeconds(for: pid) else { continue }
+                guard let r = ProcessSampler.rusage(for: pid) else { continue }
                 let (raw, normalized): (Double, Double)
                 if let prev = self.prevCPUSeconds[pid] {
                     (raw, normalized) = ProcessSampler.computeRate(
                         prevCPUSeconds: prev.seconds,
-                        currCPUSeconds: cpu,
+                        currCPUSeconds: r.cpuSeconds,
                         prevWall: prev.at,
                         currWall: now
                     )
                 } else {
                     (raw, normalized) = (0, 0)
                 }
-                let name = ProcessSampler.name(for: pid)
-                let path = ProcessSampler.path(for: pid)
-                let rss = ProcessSampler.residentMemoryBytes(for: pid)
+                let info: (name: String, path: String)
+                if let cached = self.pidInfo[pid] {
+                    info = cached
+                } else {
+                    info = (ProcessSampler.name(for: pid), ProcessSampler.path(for: pid))
+                    self.pidInfo[pid] = info
+                }
                 newSamples.append(ProcessSample(
-                    pid: pid, name: name, path: path,
-                    cpuTimeSeconds: cpu, cpuRawPct: raw, cpuNormalizedPct: normalized,
-                    rssBytes: rss, sampledAt: now
+                    pid: pid, name: info.name, path: info.path,
+                    cpuTimeSeconds: r.cpuSeconds, cpuRawPct: raw, cpuNormalizedPct: normalized,
+                    rssBytes: r.rssBytes, sampledAt: now
                 ))
-                self.prevCPUSeconds[pid] = (cpu, now)
+                self.prevCPUSeconds[pid] = (r.cpuSeconds, now)
             }
 
             let visibleSet = Set(allPIDs)
             self.prevCPUSeconds = self.prevCPUSeconds.filter { visibleSet.contains($0.key) }
+            self.pidInfo = self.pidInfo.filter { visibleSet.contains($0.key) }
 
             newSamples.sort { $0.cpuRawPct > $1.cpuRawPct }
 

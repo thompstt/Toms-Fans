@@ -43,9 +43,9 @@ enum ProcessSampler {
         return pids.prefix(actualCount).filter { $0 > 0 }
     }
 
-    /// Cumulative CPU time in seconds for a PID, via proc_pid_rusage.
+    /// One proc_pid_rusage call returning both CPU time (seconds) and RSS (bytes).
     /// Returns nil on permission denial or process gone.
-    static func cpuTimeSeconds(for pid: pid_t) -> Double? {
+    static func rusage(for pid: pid_t) -> (cpuSeconds: Double, rssBytes: UInt64)? {
         var rusage = rusage_info_current()
         let result = withUnsafeMutablePointer(to: &rusage) { ptr -> Int32 in
             ptr.withMemoryRebound(to: rusage_info_t?.self, capacity: 1) { rebound in
@@ -54,19 +54,7 @@ enum ProcessSampler {
         }
         guard result == 0 else { return nil }
         let nanos = rusage.ri_user_time + rusage.ri_system_time
-        return Double(nanos) / 1_000_000_000.0
-    }
-
-    /// Resident memory bytes for a PID.
-    static func residentMemoryBytes(for pid: pid_t) -> UInt64 {
-        var rusage = rusage_info_current()
-        let result = withUnsafeMutablePointer(to: &rusage) { ptr -> Int32 in
-            ptr.withMemoryRebound(to: rusage_info_t?.self, capacity: 1) { rebound in
-                proc_pid_rusage(pid, RUSAGE_INFO_CURRENT, rebound)
-            }
-        }
-        guard result == 0 else { return 0 }
-        return rusage.ri_resident_size
+        return (Double(nanos) / 1_000_000_000.0, rusage.ri_resident_size)
     }
 
     /// Short executable name (no path). Falls back to "<pid>" if unreadable.
