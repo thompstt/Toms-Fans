@@ -83,3 +83,34 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         SKIP_INSTALL: YES
         GENERATE_INFOPLIST_FILE: false
+
+  Tom's FansTests:
+    type: bundle.unit-test
+    platform: macOS
+    sources:
+      - path: Tests
+        excludes:
+          - "**/.DS_Store"
+      - path: Shared/Safety
+        excludes:
+          - "**/.DS_Store"
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.tomsfans.tests
+        GENERATE_INFOPLIST_FILE: true
+        MACOSX_DEPLOYMENT_TARGET: "13.0"
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        DEVELOPMENT_TEAM: ""
+
+schemes:
+  Tom's Fans:
+    build:
+      targets:
+        Tom's Fans: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - Tom's FansTests

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -30,10 +30,12 @@
 		63805D687FBB9AB9DF7EBD98 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A5B14DFC218427E225920E0 /* ContentView.swift */; };
 		63AFBB0E5A5069A127D0FDE2 /* ErrorViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = CA8A93648C6C49BC553A4CCA /* ErrorViews.swift */; };
 		6456DC6B4678801C722CC99F /* SMCKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504DD156ADB0771792AC76F2 /* SMCKeys.swift */; };
+		6523C2451ADCCA258F479326 /* ThermalLockoutState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AE78BFDFFBF537805FEC78 /* ThermalLockoutState.swift */; };
 		6F23BD7D3A97A4E6FA04B97E /* Fan.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0619041B5B9D41741C5EF40 /* Fan.swift */; };
 		6F4C20439DA7CED612FE8801 /* FanControlProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8862E4BF60D557267DAACB1B /* FanControlProtocol.swift */; };
 		79E01E71B7E71A52DC50FA63 /* ErrorLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DA401AF3AE2023682278131 /* ErrorLog.swift */; };
 		819E01693DFDA484D79059A0 /* SMCReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27B1B34C8C83BF04EE5C331 /* SMCReader.swift */; };
+		853CD5C55E9C11E543D7FD43 /* ThermalLockoutState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AE78BFDFFBF537805FEC78 /* ThermalLockoutState.swift */; };
 		936822D28693FA51A5C14F64 /* FanCurve.swift in Sources */ = {isa = PBXBuildFile; fileRef = 367EFD32C8E1FB6C9208D008 /* FanCurve.swift */; };
 		95534AD6B518364C5A74824B /* ProcessSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = D191317BAB748D5EF1BC5312 /* ProcessSample.swift */; };
 		956DA0A7FCB412EBAE68F929 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F594212A424DF3E5F5BB4B5 /* DashboardView.swift */; };
@@ -43,14 +45,17 @@
 		B5ADA017B3FC5A0570E0A540 /* ProcessMonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02705BD5E78EAD0AD4E02D09 /* ProcessMonitorService.swift */; };
 		BFCA3CE71EB259F8CE4A89F8 /* HelperInstallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD89D062381E576085C285DD /* HelperInstallService.swift */; };
 		CCB6D162B0C7ACB37E8AB0A2 /* SMCDataTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8C404EAE5CF273E24394AC3 /* SMCDataTypes.swift */; };
+		D2B07250DCA2F91F9128F3BA /* ThermalLockoutState.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3AE78BFDFFBF537805FEC78 /* ThermalLockoutState.swift */; };
 		D2C22922161412DF82D40055 /* ProcessSampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = B09142E6DFC01A6B96F36AD7 /* ProcessSampler.swift */; };
 		D38920FB74BB0C1C433C4F51 /* CurveGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C393F63AFB49415739ABD0EE /* CurveGraphView.swift */; };
 		DB8288A37CF554408F7515F3 /* XPCFanControlService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D52E5A1B7F1A476FE09B0FB /* XPCFanControlService.swift */; };
 		E1C75D9776913672B774A665 /* FanGaugeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ECD97A3BEA02C21155F67BB1 /* FanGaugeView.swift */; };
 		E36FF662E3758F8787E80AFC /* com.tomsfans.helper in Resources */ = {isa = PBXBuildFile; fileRef = 1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E40E8841F0CC3299DB1DCA8C /* launchd-system.plist in Resources */ = {isa = PBXBuildFile; fileRef = 034E552B901DA5D58241A9C2 /* launchd-system.plist */; };
 		E59777273B4523139A6F6A8D /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAE415AA3D435351A841DFE9 /* main.swift */; };
 		E73C2C6489843CD0876B33C7 /* SMCConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30F64B6BCCF8BDA8FE5CED0 /* SMCConnection.swift */; };
 		E83FDD325CB860AA5DA5F15F /* SMCParamStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = B661B702991170974ED7A8AB /* SMCParamStruct.swift */; };
+		EBD2852D2AEDC99397EAEF84 /* ThermalLockoutStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67D5F84D81C49028B31D9E48 /* ThermalLockoutStateTests.swift */; };
 		ED122093928061C110382EDE /* XPCConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DF3130A087432DF397B5E87 /* XPCConstants.swift */; };
 		F0662CFA6A4FC1F6E62CC270 /* SMCConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30F64B6BCCF8BDA8FE5CED0 /* SMCConnection.swift */; };
 		F73A2C2632BC87A18EAC1F39 /* SMCParamStruct.swift in Sources */ = {isa = PBXBuildFile; fileRef = B661B702991170974ED7A8AB /* SMCParamStruct.swift */; };
@@ -70,11 +75,12 @@
 /* Begin PBXFileReference section */
 		02416415CF3FF88E5D8736AD /* CulpritCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CulpritCardView.swift; sourceTree = "<group>"; };
 		02705BD5E78EAD0AD4E02D09 /* ProcessMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMonitorService.swift; sourceTree = "<group>"; };
+		034E552B901DA5D58241A9C2 /* launchd-system.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "launchd-system.plist"; sourceTree = "<group>"; };
 		0BD4B49B5E5C0CA001540EA4 /* FanControlServiceImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanControlServiceImpl.swift; sourceTree = "<group>"; };
 		0C0A3C67D3958D1A064CCF21 /* ProcessMonitorDebugHarness.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessMonitorDebugHarness.swift; sourceTree = "<group>"; };
 		0DA401AF3AE2023682278131 /* ErrorLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorLog.swift; sourceTree = "<group>"; };
 		1350EE35B143206D78C28EA3 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
-		1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = com.tomsfans.helper; sourceTree = BUILT_PRODUCTS_DIR; };
+		1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */ = {isa = PBXFileReference; includeInIndex = 0; path = com.tomsfans.helper; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A5B14DFC218427E225920E0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		2D52E5A1B7F1A476FE09B0FB /* XPCFanControlService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCFanControlService.swift; sourceTree = "<group>"; };
 		322115D488328C9C9468E93E /* ProcessCulprit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessCulprit.swift; sourceTree = "<group>"; };
@@ -88,12 +94,15 @@
 		5DF3130A087432DF397B5E87 /* XPCConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCConstants.swift; sourceTree = "<group>"; };
 		5F594212A424DF3E5F5BB4B5 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		64D4A6784286D9754A99A1B4 /* TemperatureChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureChartView.swift; sourceTree = "<group>"; };
+		67D5F84D81C49028B31D9E48 /* ThermalLockoutStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalLockoutStateTests.swift; sourceTree = "<group>"; };
 		69A36AEEC2C746661963C6E8 /* FanCurveEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanCurveEngine.swift; sourceTree = "<group>"; };
 		6AD201BF0F34D1662E3DAD6C /* TemperatureSensor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureSensor.swift; sourceTree = "<group>"; };
+		87804F34607658DE8CA7F288 /* Tom's FansTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Tom's FansTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8862E4BF60D557267DAACB1B /* FanControlProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanControlProtocol.swift; sourceTree = "<group>"; };
 		9D79907F6D7749C6CC189089 /* ProcessListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessListView.swift; sourceTree = "<group>"; };
 		A0619041B5B9D41741C5EF40 /* Fan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fan.swift; sourceTree = "<group>"; };
 		A08F4B77B2A9C23A0078CE2F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A3AE78BFDFFBF537805FEC78 /* ThermalLockoutState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalLockoutState.swift; sourceTree = "<group>"; };
 		A6EF00180A73D7F01A2E834B /* FanControlDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FanControlDelegate.swift; sourceTree = "<group>"; };
 		B09142E6DFC01A6B96F36AD7 /* ProcessSampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessSampler.swift; sourceTree = "<group>"; };
 		B27B1B34C8C83BF04EE5C331 /* SMCReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCReader.swift; sourceTree = "<group>"; };
@@ -142,6 +151,7 @@
 		3461145C1DF0A8C79F006732 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				78380AFB51F4B7BD6B907A9C /* Safety */,
 				336493D1E1C0E69DE5845667 /* SMCKit */,
 				532383DBCA45C38700C9ED37 /* XPCProtocol */,
 			);
@@ -153,6 +163,7 @@
 			children = (
 				1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */,
 				D9A480F8D73D80FBDD54BB74 /* Tom's Fans.app */,
+				87804F34607658DE8CA7F288 /* Tom's FansTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -183,6 +194,22 @@
 			path = XPCProtocol;
 			sourceTree = "<group>";
 		};
+		71E8A9BDAF5F1E4A2BED974E /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				67D5F84D81C49028B31D9E48 /* ThermalLockoutStateTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
+		78380AFB51F4B7BD6B907A9C /* Safety */ = {
+			isa = PBXGroup;
+			children = (
+				A3AE78BFDFFBF537805FEC78 /* ThermalLockoutState.swift */,
+			);
+			path = Safety;
+			sourceTree = "<group>";
+		};
 		7DCAE2A08273A3869A94DB93 /* MenuBar */ = {
 			isa = PBXGroup;
 			children = (
@@ -196,6 +223,7 @@
 			children = (
 				A6EF00180A73D7F01A2E834B /* FanControlDelegate.swift */,
 				0BD4B49B5E5C0CA001540EA4 /* FanControlServiceImpl.swift */,
+				034E552B901DA5D58241A9C2 /* launchd-system.plist */,
 				BAE415AA3D435351A841DFE9 /* main.swift */,
 			);
 			path = Helper;
@@ -234,6 +262,7 @@
 				87F307F4C2ECB22AF34009D4 /* Helper */,
 				B23FF4AEB028B0F597D95AA5 /* Resources */,
 				3461145C1DF0A8C79F006732 /* Shared */,
+				71E8A9BDAF5F1E4A2BED974E /* Tests */,
 				34CA9F8322AF118473CD6297 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -283,6 +312,7 @@
 			buildConfigurationList = 61F45E9D706F367B97DCE8AF /* Build configuration list for PBXNativeTarget "com.tomsfans.helper" */;
 			buildPhases = (
 				BCA3314593CD3DB3622D2E46 /* Sources */,
+				2FCA22796E21B4B34B936976 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -294,6 +324,23 @@
 			productName = com.tomsfans.helper;
 			productReference = 1C28C99B7EEE52B984602AF1 /* com.tomsfans.helper */;
 			productType = "com.apple.product-type.tool";
+		};
+		B6B85804E48C8763EDD995AA /* Tom's FansTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E7A24F60417254B3ECA21250 /* Build configuration list for PBXNativeTarget "Tom's FansTests" */;
+			buildPhases = (
+				E427322B2336364A3B08748C /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Tom's FansTests";
+			packageProductDependencies = (
+			);
+			productName = "Tom's FansTests";
+			productReference = 87804F34607658DE8CA7F288 /* Tom's FansTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		F1CB6BFE3535DE63813A506D /* Tom's Fans */ = {
 			isa = PBXNativeTarget;
@@ -328,6 +375,10 @@
 						DevelopmentTeam = "";
 						ProvisioningStyle = Manual;
 					};
+					B6B85804E48C8763EDD995AA = {
+						DevelopmentTeam = "";
+						ProvisioningStyle = Manual;
+					};
 					F1CB6BFE3535DE63813A506D = {
 						DevelopmentTeam = "";
 						ProvisioningStyle = Manual;
@@ -344,10 +395,12 @@
 			);
 			mainGroup = CEE092C3F2129E5E66227D90;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				F1CB6BFE3535DE63813A506D /* Tom's Fans */,
+				B6B85804E48C8763EDD995AA /* Tom's FansTests */,
 				65E4FD8409E81856DBD0BE1A /* com.tomsfans.helper */,
 			);
 		};
@@ -360,6 +413,14 @@
 			files = (
 				31672F9F495F100E81760861 /* Assets.xcassets in Resources */,
 				E36FF662E3758F8787E80AFC /* com.tomsfans.helper in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		2FCA22796E21B4B34B936976 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E40E8841F0CC3299DB1DCA8C /* launchd-system.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -382,7 +443,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "# Copy helper launchd plist into app bundle for SMAppService.daemon\nHELPER_DST=\"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Contents/Library/LaunchDaemons\"\nPLIST_SRC=\"${SRCROOT}/Helper/launchd.plist\"\n\nmkdir -p \"${HELPER_DST}\"\ncp -f \"${PLIST_SRC}\" \"${HELPER_DST}/com.tomsfans.helper.plist\"\n";
+			shellScript = "# Copy helper binary into app bundle for SMAppService.daemon\nHELPER_SRC=\"${BUILT_PRODUCTS_DIR}/com.tomsfans.helper\"\nHELPER_DST=\"${BUILT_PRODUCTS_DIR}/${FULL_PRODUCT_NAME}/Contents/Library/LaunchDaemons\"\nPLIST_SRC=\"${SRCROOT}/Helper/launchd.plist\"\n\nmkdir -p \"${HELPER_DST}\"\ncp -f \"${HELPER_SRC}\" \"${HELPER_DST}/com.tomsfans.helper\"\ncp -f \"${PLIST_SRC}\" \"${HELPER_DST}/com.tomsfans.helper.plist\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -399,6 +460,7 @@
 				6456DC6B4678801C722CC99F /* SMCKeys.swift in Sources */,
 				E83FDD325CB860AA5DA5F15F /* SMCParamStruct.swift in Sources */,
 				819E01693DFDA484D79059A0 /* SMCReader.swift in Sources */,
+				6523C2451ADCCA258F479326 /* ThermalLockoutState.swift in Sources */,
 				ED122093928061C110382EDE /* XPCConstants.swift in Sources */,
 				E59777273B4523139A6F6A8D /* main.swift in Sources */,
 			);
@@ -441,9 +503,19 @@
 				B0BE4EA15B9C9E2B510A55C1 /* TemperatureChartView.swift in Sources */,
 				54EBAC1E582B25821413406B /* TemperatureSensor.swift in Sources */,
 				1160E250B5E5F875859EE75C /* ThermalCorrelator.swift in Sources */,
+				853CD5C55E9C11E543D7FD43 /* ThermalLockoutState.swift in Sources */,
 				A38CADFD2BEFC9F4EFE306AD /* TomsFansApp.swift in Sources */,
 				4743898FEC4B1278D4BF96BD /* XPCConstants.swift in Sources */,
 				DB8288A37CF554408F7515F3 /* XPCFanControlService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E427322B2336364A3B08748C /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D2B07250DCA2F91F9128F3BA /* ThermalLockoutState.swift in Sources */,
+				EBD2852D2AEDC99397EAEF84 /* ThermalLockoutStateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -515,7 +587,6 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -598,6 +669,26 @@
 			};
 			name = Debug;
 		};
+		5CA5E19F0AB50AD1E7D0854D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tomsfans.tests;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		8E61FD356554875605796472 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -640,6 +731,26 @@
 			};
 			name = Debug;
 		};
+		E9E01C084D80C652969CD2F0 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.tomsfans.tests;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
 		FEDD288245B2B5FD5DF3FE43 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -670,7 +781,7 @@
 				0D361485FD2C43FC01A41989 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		3AE31D3B5489EB54D17C421B /* Build configuration list for PBXNativeTarget "Tom's Fans" */ = {
 			isa = XCConfigurationList;
@@ -679,7 +790,7 @@
 				8E61FD356554875605796472 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
 		};
 		61F45E9D706F367B97DCE8AF /* Build configuration list for PBXNativeTarget "com.tomsfans.helper" */ = {
 			isa = XCConfigurationList;
@@ -688,7 +799,16 @@
 				FEDD288245B2B5FD5DF3FE43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
+			defaultConfigurationName = Debug;
+		};
+		E7A24F60417254B3ECA21250 /* Build configuration list for PBXNativeTarget "Tom's FansTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E9E01C084D80C652969CD2F0 /* Debug */,
+				5CA5E19F0AB50AD1E7D0854D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
 	};
