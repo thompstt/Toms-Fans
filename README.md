@@ -22,27 +22,37 @@ Lightweight — ~1–2% CPU on a 2019 i9 MacBook Pro, ~60 MB memory.
 
 ## Requirements
 
-- macOS 13.0+ (Ventura)
+- macOS 13 (Ventura) or later
 - Apple Silicon or Intel Mac
+- Xcode (to build from source)
 
-## Installation
+## Building from source
 
-### Download
+This is a source-only release: clone the repo and build locally. The app is
+**ad-hoc signed** and runs locally with no Apple Developer account required.
 
-Download the latest release from the [Releases](../../releases) page.
+```bash
+git clone <repo-url>
+cd "Tom's Fans"
+./build-release.sh
+```
 
-### Build from Source
+The script prints the path to the built `Tom's Fans.app`. (You can also open
+`Tom's Fans.xcodeproj` in Xcode and build the **Tom's Fans** scheme.)
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/thompstt/toms-fans.git
-   cd toms-fans
-   ```
-2. Open `Tom's Fans.xcodeproj` in Xcode
-3. Build and run (**Cmd+R**)
-4. On first launch, the app will prompt to install the privileged helper for fan control
+## Installing the privileged helper
 
-> **Note:** Writing fan speeds requires a privileged helper tool installed via SMJobBless. The app will guide you through installation.
+Fan writes require a root helper that performs SMC writes. Install it **either** way:
+
+- **In-app (recommended):** Launch the app, open Settings → Helper Tool, and click
+  **Install Helper**. The helper is registered via `SMAppService`. macOS may show
+  the status **"Requires Approval"** — enable *Tom's Fans* in
+  System Settings → General → Login Items & Extensions (the app provides an
+  **Open Login Items Settings** button).
+- **Script (fallback):** `sudo ./install-helper.sh` copies the helper to
+  `/Library/PrivilegedHelperTools/` and loads it as a system LaunchDaemon.
+
+To remove the helper: `sudo ./uninstall-helper.sh`.
 
 ## Usage
 
@@ -82,7 +92,7 @@ Tom's Fans
 ```
 
 - **App** — SwiftUI frontend providing monitoring views, fan controls, and curve editing
-- **Privileged Helper** — a launchd-managed helper installed via `SMJobBless` that performs SMC writes with elevated privileges
+- **Privileged Helper** — a launchd-managed helper registered via `SMAppService` (or installed by `install-helper.sh`) that performs SMC writes with elevated privileges
 - **XPC** — secure inter-process communication between the app and the helper
 - **SMCKit** — low-level System Management Controller access via IOKit for reading temperatures and fan data
 
