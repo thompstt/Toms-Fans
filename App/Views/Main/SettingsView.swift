@@ -4,6 +4,7 @@ import AppKit
 struct SettingsView: View {
     @EnvironmentObject var settings: AppSettings
     @EnvironmentObject var helperInstall: HelperInstallService
+    @EnvironmentObject var fanControl: XPCFanControlService
     @EnvironmentObject var errorLog: ErrorLog
 
     var body: some View {
@@ -31,6 +32,30 @@ struct SettingsView: View {
                     Text("Status:")
                     Text(helperInstall.statusDescription)
                         .foregroundStyle(helperInstall.isHelperRunning ? .green : .orange)
+                }
+
+                switch fanControl.helperVersionStatus {
+                case .matched(let version):
+                    HStack {
+                        Text("Version:")
+                        Text(version)
+                            .monospacedDigit()
+                            .foregroundStyle(.secondary)
+                    }
+                case .mismatched(let installed, let expected):
+                    VStack(alignment: .leading, spacing: 6) {
+                        Label("A different helper version is installed (running \(installed), this app expects \(expected)). Update it to apply the latest fixes.",
+                              systemImage: "exclamationmark.triangle.fill")
+                            .font(.caption)
+                            .foregroundStyle(.orange)
+                        Button("Update Helper") {
+                            helperInstall.unregister()
+                            helperInstall.register()
+                            fanControl.reconnectAndVerify()
+                        }
+                    }
+                case .unknown:
+                    EmptyView()
                 }
 
                 if !helperInstall.isHelperRunning {

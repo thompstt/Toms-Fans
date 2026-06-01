@@ -5,6 +5,10 @@ final class XPCFanControlService: ObservableObject {
     @Published private(set) var isConnected = false
     @Published private(set) var lastError: String?
 
+    /// Whether the installed helper matches the version this app build expects.
+    /// Updated on every (re)connect by probing `getHelperVersion()`.
+    @Published private(set) var helperVersionStatus: HelperVersionStatus = .unknown
+
     var errorLog: ErrorLog?
     var onDisconnect: (() -> Void)?
     private var xpcConnection: NSXPCConnection?
@@ -37,6 +41,7 @@ final class XPCFanControlService: ObservableObject {
     }
 
     func connect() {
+        guard xpcConnection == nil else { return }
         let conn = NSXPCConnection(machServiceName: XPCConstants.machServiceName,
                                    options: .privileged)
         conn.remoteObjectInterface = NSXPCInterface(with: FanControlProtocol.self)
@@ -44,6 +49,7 @@ final class XPCFanControlService: ObservableObject {
             DispatchQueue.main.async {
                 self?.isConnected = false
                 self?.xpcConnection = nil
+                self?.helperVersionStatus = .unknown
                 self?.onDisconnect?()
             }
         }
@@ -52,12 +58,45 @@ final class XPCFanControlService: ObservableObject {
         isConnected = true
         lastError = nil
         errorLog?.clearCondition(id: "xpc.disconnected")
+        verifyHelperVersion()
     }
 
     func disconnect() {
         xpcConnection?.invalidate()
         xpcConnection = nil
         isConnected = false
+        helperVersionStatus = .unknown
+    }
+
+    /// Drop any existing connection and reconnect, re-probing the helper version.
+    /// Used after reinstalling the helper so the UI reflects the freshly loaded binary.
+    func reconnectAndVerify() {
+        disconnect()
+        connect()
+    }
+
+    /// Probe the running helper's version and compare it to the version this app build
+    /// expects (`XPCConstants.helperVersion`). A mismatch means an old helper is still
+    /// running after an app update; we surface it as a condition for the UI to act on.
+    func verifyHelperVersion() {
+        proxy?.getHelperVersion { [weak self] reported in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                let status = HelperVersionCheck.evaluate(installed: reported,
+                                                         expected: XPCConstants.helperVersion)
+                self.helperVersionStatus = status
+                switch status {
+                case .mismatched(let installed, let expected):
+                    self.errorLog?.setCondition(
+                        id: "helper.versionMismatch",
+                        message: "Installed helper is \(installed); this app expects \(expected). Update the helper.",
+                        source: .xpc, severity: .warning
+                    )
+                case .matched, .unknown:
+                    self.errorLog?.clearCondition(id: "helper.versionMismatch")
+                }
+            }
+        }
     }
 
     /// Convenience: set fan speed and update state on completion.
