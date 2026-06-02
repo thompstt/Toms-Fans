@@ -555,6 +555,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				OTHER_CODE_SIGN_FLAGS = "--identifier com.tomsfans.helper";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tomsfans.helper;
 				PRODUCT_NAME = com.tomsfans.helper;
 				SDKROOT = macosx;
@@ -776,6 +777,7 @@
 					"$(inherited)",
 					"@executable_path/../Frameworks",
 				);
+				OTHER_CODE_SIGN_FLAGS = "--identifier com.tomsfans.helper";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tomsfans.helper;
 				PRODUCT_NAME = com.tomsfans.helper;
 				SDKROOT = macosx;

@@ -83,6 +83,14 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         SKIP_INSTALL: YES
         GENERATE_INFOPLIST_FILE: false
+        # The helper is a command-line tool with no Info.plist, so codesign derives
+        # its signing identifier from the binary name "com.tomsfans.helper" — and
+        # strips ".helper" as if it were a file extension, yielding "com.tomsfans".
+        # That mismatched identity fails the SMAppService LaunchDaemon's launch
+        # requirement (LWCR), so launchd rejects every spawn with EX_CONFIG (78) and
+        # the helper never runs. Pin the identifier explicitly so it matches the
+        # daemon Label / registration.
+        OTHER_CODE_SIGN_FLAGS: "--identifier com.tomsfans.helper"
 
   Tom's FansTests:
     type: bundle.unit-test
