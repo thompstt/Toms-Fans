@@ -1,4 +1,7 @@
 import SwiftUI
+import AppKit
+import Combine
+import ServiceManagement
 
 struct SensorGroup: Identifiable {
     let category: SensorCategory
@@ -352,6 +355,7 @@ struct DashboardView: View {
     @EnvironmentObject var errorLog: ErrorLog
     @EnvironmentObject var processMonitor: ProcessMonitorService
     @EnvironmentObject var remediation: ProcessRemediationService
+    @EnvironmentObject var helperInstall: HelperInstallService
     @State private var chartSensorKeys: Set<String> = ["TCXC", "TG0P"]
     @State private var expandedCategories: Set<SensorCategory> = []
     @State private var manualSpeeds: [Int: Double] = [:]
@@ -387,8 +391,13 @@ struct DashboardView: View {
     private var mainPanel: some View {
         ScrollView {
             LazyVStack(alignment: .center, spacing: 12) {
-                if !errorLog.activeConditions.isEmpty {
-                    ErrorBannerView(conditions: errorLog.activeConditions)
+                if let banner = helperBanner {
+                    HelperStatusBanner(message: banner.message,
+                                       actionTitle: banner.actionTitle,
+                                       action: handleHelperBannerTap)
+                }
+                if !displayedConditions.isEmpty {
+                    ErrorBannerView(conditions: displayedConditions)
                 } else if !monitor.isConnected {
                     ErrorBannerView(conditions: [
                         "smc.disconnected": ErrorEntry(
@@ -481,6 +490,54 @@ struct DashboardView: View {
             .padding(12)
         }
         .frame(minWidth: 450)
+        .onAppear { helperInstall.refreshStatus() }
+        // Re-check when the user returns from System Settings after approving the helper.
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.didBecomeActiveNotification)) { _ in
+            helperInstall.refreshStatus()
+        }
+        // Once the helper becomes enabled, reconnect so fan control works without a relaunch.
+        .onChange(of: helperInstall.status) { newStatus in
+            if newStatus == .enabled, !fanControl.isConnected {
+                fanControl.reconnectAndVerify()
+            }
+        }
+    }
+
+    /// Actionable message shown when the privileged helper isn't enabled, so the user
+    /// isn't left with fans that silently can't be controlled. nil when `.enabled`.
+    private var helperBanner: (message: String, actionTitle: String)? {
+        switch helperInstall.status {
+        case .enabled:
+            return nil
+        case .requiresApproval:
+            return ("Fan control is off — approve \u{201C}Tom\u{2019}s Fans\u{201D} in System Settings \u{25B8} Login Items & Extensions to enable the helper.",
+                    "Open Login Items Settings")
+        case .notRegistered, .notFound:
+            return ("Fan-control helper isn\u{2019}t installed — fans can\u{2019}t be controlled.",
+                    "Install Helper")
+        @unknown default:
+            return ("Fan-control helper isn\u{2019}t running — fans can\u{2019}t be controlled.",
+                    "Install Helper")
+        }
+    }
+
+    /// While the helper isn't enabled, the dedicated banner already explains the lost
+    /// connection — suppress the generic "Helper connection lost" condition so the user
+    /// sees one clear, actionable message instead of two.
+    private var displayedConditions: [String: ErrorEntry] {
+        guard helperInstall.status != .enabled else { return errorLog.activeConditions }
+        return errorLog.activeConditions.filter { $0.key != "xpc.disconnected" }
+    }
+
+    private func handleHelperBannerTap() {
+        switch helperInstall.status {
+        case .requiresApproval:
+            if let url = URL(string: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension") {
+                NSWorkspace.shared.open(url)
+            }
+        default:
+            helperInstall.register()
+        }
     }
 
     // MARK: - Inline Fan Curve Editor

@@ -55,9 +55,11 @@ final class XPCFanControlService: ObservableObject {
         }
         conn.resume()
         xpcConnection = conn
-        isConnected = true
-        lastError = nil
-        errorLog?.clearCondition(id: "xpc.disconnected")
+        // NSXPCConnection is lazy: resume() never fails synchronously, even when the
+        // helper can't launch (e.g. not yet approved in Login Items). Don't claim to be
+        // connected until a real round-trip succeeds — verifyHelperVersion() flips
+        // isConnected once the helper actually replies, and the proxy/invalidation
+        // error handlers clear it on failure.
         verifyHelperVersion()
     }
 
@@ -82,6 +84,10 @@ final class XPCFanControlService: ObservableObject {
         proxy?.getHelperVersion { [weak self] reported in
             DispatchQueue.main.async {
                 guard let self else { return }
+                // A reply proves the helper actually launched and is reachable.
+                self.isConnected = true
+                self.lastError = nil
+                self.errorLog?.clearCondition(id: "xpc.disconnected")
                 let status = HelperVersionCheck.evaluate(installed: reported,
                                                          expected: XPCConstants.helperVersion)
                 self.helperVersionStatus = status

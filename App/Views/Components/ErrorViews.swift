@@ -39,6 +39,38 @@ struct ErrorToastView: View {
     }
 }
 
+// MARK: - Helper-not-enabled Banner (actionable)
+
+/// Shown on the dashboard when the privileged helper isn't enabled, so the user
+/// isn't left with fans that silently can't be controlled. Dumb on purpose — the
+/// caller supplies the message, button title, and action (open Login Items / install).
+struct HelperStatusBanner: View {
+    let message: String
+    let actionTitle: String
+    let action: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.caption)
+            Text(message)
+                .font(.caption)
+            Spacer()
+            Button(actionTitle, action: action)
+                .controlSize(.small)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.orange.opacity(0.12))
+        .foregroundStyle(Color.orange)
+        .clipShape(RoundedRectangle(cornerRadius: 6))
+        .overlay(
+            RoundedRectangle(cornerRadius: 6)
+                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
+        )
+    }
+}
+
 // MARK: - Persistent Banner (stays until condition resolves)
 
 struct ErrorBannerView: View {
